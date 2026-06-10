@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Product extends Model
 {
@@ -33,11 +34,17 @@ class Product extends Model
         return $this->hasMany(StockMovement::class);
     }
 
-    // Stock actuel = somme des approvisionnements
-    // À compléter quand la table ventes sera créée :
-    // return $entrees - $this->ventes()->sum('quantite')
+    public function commandeItems(): HasMany
+    {
+        return $this->hasMany(CommandeProduit::class);
+    }
+
     public function getStockActuelAttribute(): float
     {
-        return (float) $this->stockMovements()->sum('quantite');
+        $entrees = (float) $this->stockMovements()->sum('quantite');
+        $sorties = (float) $this->commandeItems()
+            ->whereHas('commande', fn ($q) => $q->where('statut', 'payee'))
+            ->sum('quantite');
+        return $entrees - $sorties;
     }
 }
