@@ -55,11 +55,11 @@
             @endcan
             @endcanany
 
-            @canany(['Voir Caisse', 'Voir Sessions Caisse', 'Voir Journal Caisse', 'Voir Commandes'])
+            @canany(['Voir Caisse', 'Voir Activité Caisse', 'Voir Sessions Caisse', 'Voir Journal Caisse', 'Voir Commandes'])
             <!-- SÉPARATEUR -->
             <li class="nav-main-heading">Ventes</li>
 
-            @canany(['Voir Caisse', 'Voir Sessions Caisse', 'Voir Journal Caisse'])
+            @canany(['Voir Caisse', 'Voir Activité Caisse', 'Voir Sessions Caisse', 'Voir Journal Caisse'])
             <!-- CAISSE -->
             <li class="nav-main-item {{ request()->routeIs('caisse*') ? 'open' : '' }}">
                 <a class="nav-main-link nav-main-link-submenu {{ request()->routeIs('caisse*') ? 'active' : '' }}" data-toggle="submenu" aria-haspopup="true" aria-expanded="{{ request()->routeIs('caisse*') ? 'true' : 'false' }}" href="#">

@@ -4,29 +4,15 @@ namespace App\Livewire\Caisses\Modals;
 
 use App\Models\Caisse;
 use App\Models\SessionCaisse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class OuvrirSession extends ModalComponent
 {
-    public $caisse_id       = '';
-    public $fond_ouverture  = '';
-    public $note_ouverture  = '';
-
-    public function mount(): void
-    {
-        $caisse = Caisse::where('statut', 'active')->first();
-        if ($caisse) {
-            $this->caisse_id = $caisse->id;
-        }
-    }
-
-    public function render()
-    {
-        return view('livewire.caisses.modals.ouvrir-session', [
-            'caisses' => Caisse::where('statut', 'active')->orderBy('nom')->get(),
-        ]);
-    }
+    public string $fond_especes   = '';
+    public string $fond_mobile    = '';
+    public string $note_ouverture = '';
 
     public function ouvrir(): void
     {
@@ -34,46 +20,60 @@ class OuvrirSession extends ModalComponent
 
         $this->validate(
             [
-                'caisse_id'      => ['required', 'exists:caisses,id'],
-                'fond_ouverture' => ['required', 'numeric', 'min:0'],
+                'fond_especes' => ['required', 'numeric', 'min:0'],
+                'fond_mobile'  => ['required', 'numeric', 'min:0'],
                 'note_ouverture' => ['nullable', 'string', 'max:500'],
             ],
             [
-                'caisse_id.required'      => 'Veuillez sélectionner une caisse.',
-                'fond_ouverture.required' => 'Le fond d\'ouverture est obligatoire.',
-                'fond_ouverture.min'      => 'Le fond d\'ouverture doit être positif ou nul.',
+                'fond_especes.required' => 'Le fond d\'ouverture espèces est obligatoire.',
+                'fond_especes.min'      => 'Le fond espèces doit être positif ou nul.',
+                'fond_mobile.required'  => 'Le fond d\'ouverture mobile money est obligatoire.',
+                'fond_mobile.min'       => 'Le fond mobile doit être positif ou nul.',
             ]
         );
 
-        $caisse = Caisse::findOrFail($this->caisse_id);
+        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->firstOrFail();
+        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->firstOrFail();
 
-        if ($caisse->sessionActive()) {
-            $this->addError('caisse_id', 'Cette caisse a déjà une session ouverte.');
+        if ($caisseEspeces->sessionActive()) {
+            $this->addError('fond_especes', 'Une session est déjà ouverte pour la caisse espèces.');
+            return;
+        }
+        if ($caisseMobile->sessionActive()) {
+            $this->addError('fond_mobile', 'Une session est déjà ouverte pour la caisse mobile money.');
             return;
         }
 
-        $session = SessionCaisse::create([
-            'caisse_id'      => $this->caisse_id,
-            'user_id'        => auth()->id(),
-            'fond_ouverture' => $this->fond_ouverture,
-            'statut'         => 'ouverte',
-            'note_ouverture' => $this->note_ouverture ?: null,
-        ]);
+        DB::transaction(function () use ($caisseEspeces, $caisseMobile) {
+            $note = $this->note_ouverture ?: null;
 
-        $soldeAvant = (float) $caisse->solde_actuel;
-        $fond       = (float) $this->fond_ouverture;
+            foreach ([
+                [$caisseEspeces, (float) $this->fond_especes],
+                [$caisseMobile,  (float) $this->fond_mobile],
+            ] as [$caisse, $fond]) {
+                $soldeAvant = (float) $caisse->solde_actuel;
 
-        $caisse->mouvements()->create([
-            'session_caisse_id' => $session->id,
-            'user_id'           => auth()->id(),
-            'type'              => 'ouverture',
-            'montant'           => $fond,
-            'solde_avant'       => $soldeAvant,
-            'solde_apres'       => $soldeAvant + $fond,
-            'note'              => $this->note_ouverture ?: null,
-        ]);
+                $session = SessionCaisse::create([
+                    'caisse_id'      => $caisse->id,
+                    'user_id'        => auth()->id(),
+                    'fond_ouverture' => $fond,
+                    'statut'         => 'ouverte',
+                    'note_ouverture' => $note,
+                ]);
 
-        $caisse->update(['solde_actuel' => $soldeAvant + $fond]);
+                $caisse->mouvements()->create([
+                    'session_caisse_id' => $session->id,
+                    'user_id'           => auth()->id(),
+                    'type'              => 'ouverture',
+                    'montant'           => $fond,
+                    'solde_avant'       => $soldeAvant,
+                    'solde_apres'       => $soldeAvant + $fond,
+                    'note'              => $note,
+                ]);
+
+                $caisse->update(['solde_actuel' => $soldeAvant + $fond]);
+            }
+        });
 
         $this->dispatch('session-ouverte');
         $this->closeModal();

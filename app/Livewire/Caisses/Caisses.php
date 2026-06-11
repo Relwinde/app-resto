@@ -7,17 +7,16 @@ use App\Models\Category;
 use App\Models\Commande;
 use App\Models\CommandeProduit;
 use App\Models\Product;
-use App\Models\SessionCaisse;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Caisses extends Component
 {
-    public array $panier     = [];  // [product_id => ['produit' => ..., 'quantite' => n, 'sous_total' => n]]
-    public int   $categorieId = 0;
-    public string $search    = '';
-
+    public string $vue         = 'commandes';
+    public array  $panier      = [];
+    public int    $categorieId = 0;
+    public string $search      = '';
     public string $table_numero = '';
     public string $client_nom   = '';
 
@@ -25,8 +24,14 @@ class Caisses extends Component
     {
         Gate::authorize('Voir Caisse');
 
-        $caisse        = Caisse::where('statut', 'active')->first();
-        $sessionActive = $caisse?->sessionActive();
+        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+        $sessionActive = $caisseEspeces?->sessionActive();
+
+        $commandes = Commande::with(['items.produit', 'user'])
+            ->whereIn('statut', ['en_attente', 'en_preparation', 'servie'])
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         $produits = Product::with('category')
             ->when($this->categorieId, fn ($q) => $q->where('category_id', $this->categorieId))
@@ -36,12 +41,11 @@ class Caisses extends Component
             ->get();
 
         $categories = Category::orderBy('name')->get();
-
-        $total = collect($this->panier)->sum('sous_total');
+        $total      = collect($this->panier)->sum('sous_total');
 
         $pageHeader = [
             'title'       => 'Caisse',
-            'subtitle'    => $caisse?->nom ?? 'Aucune caisse active',
+            'subtitle'    => $caisseEspeces?->nom ?? 'Caisse',
             'breadcrumbs' => [
                 ['label' => 'Accueil', 'url' => route('dashboard')],
                 ['label' => 'Caisse'],
@@ -49,9 +53,11 @@ class Caisses extends Component
         ];
 
         return view('livewire.caisses.caisse', compact(
-            'caisse', 'sessionActive', 'produits', 'categories', 'total', 'pageHeader'
+            'caisseEspeces', 'caisseMobile', 'sessionActive', 'commandes', 'produits', 'categories', 'total', 'pageHeader'
         ))->layout('components.layouts.app', ['title' => 'Caisse']);
     }
+
+    // ── Panier ────────────────────────────────────────────────────────────────
 
     public function ajouterProduit(int $id): void
     {
@@ -107,35 +113,71 @@ class Caisses extends Component
         $this->client_nom   = '';
     }
 
-    public function ouvrirPaiement(): void
+    // ── Enregistrement commande ───────────────────────────────────────────────
+
+    public function enregistrerCommande(): void
     {
-        Gate::authorize('Encaisser Commande');
+        Gate::authorize('Enregistrer Commande');
 
         if (empty($this->panier)) {
             return;
         }
 
-        $caisse        = Caisse::where('statut', 'active')->first();
+        $caisse        = Caisse::where('type', 'especes')->where('statut', 'active')->first();
         $sessionActive = $caisse?->sessionActive();
+        $total         = collect($this->panier)->sum('sous_total');
 
-        $total = collect($this->panier)->sum('sous_total');
-
-        $this->dispatch('openModal', [
-            'component' => 'caisses.modals.payer-commande',
-            'arguments' => [
-                'panier'         => array_values($this->panier),
-                'total'          => $total,
-                'caisse_id'      => $caisse?->id,
-                'session_id'     => $sessionActive?->id,
-                'table_numero'   => $this->table_numero,
-                'client_nom'     => $this->client_nom,
-            ],
+        $commande = Commande::create([
+            'numero'            => Commande::genererNumero(),
+            'caisse_id'         => $caisse?->id,
+            'session_caisse_id' => $sessionActive?->id,
+            'user_id'           => auth()->id(),
+            'table_numero'      => $this->table_numero ?: null,
+            'client_nom'        => $this->client_nom ?: null,
+            'statut'            => 'en_attente',
+            'montant_total'     => $total,
         ]);
+
+        foreach ($this->panier as $item) {
+            CommandeProduit::create([
+                'commande_id'   => $commande->id,
+                'product_id'    => $item['product_id'],
+                'quantite'      => $item['quantite'],
+                'prix_unitaire' => $item['prix_unitaire'],
+                'sous_total'    => $item['sous_total'],
+            ]);
+        }
+
+        $this->vider();
+        $this->vue = 'commandes';
+        $this->dispatch('commande-enregistree');
     }
 
-    #[On('commande-payee')]
-    public function onCommandePayee(): void
+    // ── Gestion statuts ───────────────────────────────────────────────────────
+
+    public function changerStatut(int $commandeId, string $statut): void
     {
-        $this->vider();
+        Gate::authorize('Changer Statut Commande');
+
+        $transitions = [
+            'en_attente'     => 'en_preparation',
+            'en_preparation' => 'servie',
+        ];
+
+        $commande = Commande::findOrFail($commandeId);
+
+        if (! isset($transitions[$commande->statut]) || $transitions[$commande->statut] !== $statut) {
+            return;
+        }
+
+        $commande->update(['statut' => $statut]);
     }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+
+    #[On('commande-enregistree')]
+    #[On('commande-statut-change')]
+    #[On('commande-encaissee')]
+    #[On('commande-annulee')]
+    public function onRefresh(): void {}
 }

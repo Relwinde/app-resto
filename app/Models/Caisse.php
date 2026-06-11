@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Caisse extends Model
 {
-    protected $fillable = ['nom', 'solde_actuel', 'statut'];
+    protected $fillable = ['nom', 'type', 'solde_actuel', 'statut'];
 
     protected $casts = [
         'solde_actuel' => 'decimal:2',
@@ -40,7 +40,7 @@ class Caisse extends Model
         $soldeApres = $soldeAvant + $montant;
 
         $mouvement = $this->mouvements()->create([
-            'session_caisse_id' => $commande->session_caisse_id,
+            'session_caisse_id' => $this->sessionActive()?->id,
             'commande_id'       => $commande->id,
             'user_id'           => auth()->id(),
             'type'              => 'encaissement',

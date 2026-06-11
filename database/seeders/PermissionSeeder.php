@@ -23,7 +23,9 @@ class PermissionSeeder extends Seeder
             // Approvisionnements
             'Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement',
             // Caisse
-            'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse', 'Encaisser Commande', 'Voir Sessions Caisse',
+            'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse',
+            'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse',
+            'Voir Activité Caisse', 'Changer Statut Commande',
             // Commandes
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             // Journal
@@ -48,7 +50,8 @@ class PermissionSeeder extends Seeder
             'Voir Produits',
             'Voir Catégories',
             'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse',
-            'Encaisser Commande', 'Voir Sessions Caisse',
+            'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse',
+            'Voir Activité Caisse', 'Changer Statut Commande',
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             'Voir Journal Caisse',
         ]);

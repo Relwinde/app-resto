@@ -8,7 +8,7 @@
                         <i class="fa fa-fw fa-unlock"></i> Ouvrir
                     </button>
                     <div wire:loading wire:target="ouvrir" class="spinner-border spinner-border-sm text-success" role="status">
-                        <span class="sr-only">Loading...</span>
+                        <span class="sr-only">Chargement...</span>
                     </div>
                     <button type="button" wire:click='$dispatch("closeModal")' class="btn btn-sm btn-alt-secondary">
                         Annuler
@@ -19,29 +19,44 @@
             <div class="block-content">
                 <div class="py-sm-3 py-md-4">
 
-                    <div class="form-group">
-                        <label for="caisse_id">Caisse <span class="text-danger">*</span></label>
-                        <select wire:model="caisse_id" class="form-control form-control-alt" id="caisse_id">
-                            <option value="">-- Sélectionner --</option>
-                            @foreach ($caisses as $caisse)
-                                <option value="{{ $caisse->id }}">{{ $caisse->nom }}</option>
-                            @endforeach
-                        </select>
-                        @error('caisse_id') <div class="text-danger small">{{ $message }}</div> @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fond_ouverture">Fond d'ouverture (FCFA) <span class="text-danger">*</span></label>
-                        <input wire:model="fond_ouverture" type="number" step="1" min="0"
-                            class="form-control form-control-alt" id="fond_ouverture" placeholder="0">
-                        @error('fond_ouverture') <div class="text-danger small">{{ $message }}</div> @enderror
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="fond_especes">
+                                    <i class="fa fa-coins text-warning mr-1"></i>
+                                    Fond d'ouverture — Espèces (FCFA) <span class="text-danger">*</span>
+                                </label>
+                                <input wire:model="fond_especes" type="number" step="1" min="0"
+                                    class="form-control form-control-alt @error('fond_especes') is-invalid @enderror"
+                                    id="fond_especes" placeholder="0">
+                                @error('fond_especes')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="fond_mobile">
+                                    <i class="fa fa-mobile-alt text-primary mr-1"></i>
+                                    Fond d'ouverture — Mobile Money (FCFA) <span class="text-danger">*</span>
+                                </label>
+                                <input wire:model="fond_mobile" type="number" step="1" min="0"
+                                    class="form-control form-control-alt @error('fond_mobile') is-invalid @enderror"
+                                    id="fond_mobile" placeholder="0">
+                                @error('fond_mobile')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group mb-0">
                         <label for="note_ouverture">Note (optionnel)</label>
                         <textarea wire:model="note_ouverture" class="form-control form-control-alt"
                             id="note_ouverture" rows="2" placeholder="Remarques..."></textarea>
-                        @error('note_ouverture') <div class="text-danger small">{{ $message }}</div> @enderror
+                        @error('note_ouverture')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                 </div>
