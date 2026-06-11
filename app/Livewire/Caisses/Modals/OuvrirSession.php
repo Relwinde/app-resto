@@ -4,6 +4,7 @@ namespace App\Livewire\Caisses\Modals;
 
 use App\Models\Caisse;
 use App\Models\SessionCaisse;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class OuvrirSession extends ModalComponent
@@ -29,6 +30,8 @@ class OuvrirSession extends ModalComponent
 
     public function ouvrir(): void
     {
+        Gate::authorize('Ouvrir Session Caisse');
+
         $this->validate(
             [
                 'caisse_id'      => ['required', 'exists:caisses,id'],

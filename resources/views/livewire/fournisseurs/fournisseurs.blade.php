@@ -7,10 +7,12 @@
             <div class="block-header">
                 <h3 class="block-title">{{ $pageHeader['subtitle'] }}</h3>
                 <div class="block-options">
+                    @can('Créer Fournisseur')
                     <button wire:click="$dispatch('openModal', { component: 'fournisseurs.modals.create-fournisseur' })"
                         class="btn btn-sm btn-primary">
                         <i class="fa fa-plus"></i> Ajouter un fournisseur
                     </button>
+                    @endcan
                 </div>
             </div>
 
@@ -46,18 +48,24 @@
                                     <span class="badge badge-primary">{{ $fournisseur->stock_movements_count }}</span>
                                 </td>
                                 <td class="text-center">
+                                    @canany(['Modifier Fournisseur', 'Supprimer Fournisseur'])
                                     <div class="btn-group">
+                                        @can('Modifier Fournisseur')
                                         <button
                                             wire:click="$dispatch('openModal', { component: 'fournisseurs.modals.edit-fournisseur', arguments: { fournisseur: {{ $fournisseur }} } })"
                                             type="button" class="btn btn-sm btn-light" title="Modifier">
                                             <i class="fa fa-fw fa-pencil-alt"></i>
                                         </button>
+                                        @endcan
+                                        @can('Supprimer Fournisseur')
                                         <a wire:click.prevent="delete({{ $fournisseur->id }})"
                                             wire:confirm="Êtes-vous sûr de vouloir supprimer ce fournisseur ?"
                                             type="button" class="btn btn-sm btn-light" title="Supprimer">
                                             <i class="fa fa-fw fa-trash"></i>
                                         </a>
+                                        @endcan
                                     </div>
+                                    @endcanany
                                 </td>
                             </tr>
                         @empty

@@ -3,6 +3,7 @@
 namespace App\Livewire\Approvisionnements;
 
 use App\Models\StockMovement;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
@@ -25,6 +26,7 @@ class Approvisionnements extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('Supprimer Approvisionnement');
         $appro = StockMovement::find($id);
         if ($appro) {
             $appro->delete();
@@ -37,6 +39,8 @@ class Approvisionnements extends Component
     #[On('approvisionnement-deleted')]
     public function render()
     {
+        Gate::authorize('Voir Approvisionnements');
+
         $approvisionnements = StockMovement::with(['product', 'fournisseur'])
             ->when($this->search, function ($query) {
                 $query->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$this->search}%"))

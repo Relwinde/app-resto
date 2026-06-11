@@ -4,6 +4,7 @@ namespace App\Livewire\Caisses;
 
 use App\Models\Caisse;
 use App\Models\MouvementCaisse;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,6 +31,8 @@ class Mouvements extends Component
 
     public function render()
     {
+        Gate::authorize('Voir Journal Caisse');
+
         $caisse = $this->caisse_id
             ? Caisse::find($this->caisse_id)
             : Caisse::where('statut', 'active')->first();

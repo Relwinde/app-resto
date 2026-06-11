@@ -3,6 +3,7 @@
 namespace App\Livewire\Categories\Modals;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use LivewireUI\Modal\ModalComponent;
 
@@ -14,6 +15,7 @@ class EditCategorie extends ModalComponent
 
     public function mount(): void
     {
+        Gate::authorize('Modifier Catégorie');
         $this->name = $this->categorie->name;
     }
 
@@ -24,6 +26,8 @@ class EditCategorie extends ModalComponent
 
     public function save(): void
     {
+        Gate::authorize('Modifier Catégorie');
+
         $this->validate(
             ['name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($this->categorie->id)]],
             [

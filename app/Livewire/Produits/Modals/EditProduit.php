@@ -4,6 +4,7 @@ namespace App\Livewire\Produits\Modals;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use LivewireUI\Modal\ModalComponent;
 
@@ -20,6 +21,7 @@ class EditProduit extends ModalComponent
 
     public function mount(): void
     {
+        Gate::authorize('Modifier Produit');
         $this->name          = $this->produit->name;
         $this->category_id   = $this->produit->category_id;
         $this->prix_vente    = $this->produit->prix_vente;
@@ -37,6 +39,8 @@ class EditProduit extends ModalComponent
 
     public function save(): void
     {
+        Gate::authorize('Modifier Produit');
+
         $this->validate(
             [
                 'name'         => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($this->produit->id)],

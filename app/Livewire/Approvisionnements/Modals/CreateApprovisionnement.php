@@ -5,6 +5,7 @@ namespace App\Livewire\Approvisionnements\Modals;
 use App\Models\Fournisseur;
 use App\Models\Product;
 use App\Models\StockMovement;
+use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 use LivewireUI\Modal\ModalComponent;
 
@@ -36,6 +37,8 @@ class CreateApprovisionnement extends ModalComponent
 
     public function create(): void
     {
+        Gate::authorize('Créer Approvisionnement');
+
         $this->validate(
             [
                 'product_id'      => ['required', 'exists:products,id'],

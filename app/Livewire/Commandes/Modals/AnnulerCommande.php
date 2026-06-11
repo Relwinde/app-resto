@@ -3,6 +3,7 @@
 namespace App\Livewire\Commandes\Modals;
 
 use App\Models\Commande;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class AnnulerCommande extends ModalComponent
@@ -17,6 +18,8 @@ class AnnulerCommande extends ModalComponent
 
     public function annuler(): void
     {
+        Gate::authorize('Annuler Commande');
+
         if (! $this->commande->estModifiable()) {
             $this->addError('motif', 'Cette commande ne peut plus être annulée.');
             return;

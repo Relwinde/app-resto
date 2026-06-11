@@ -3,6 +3,7 @@
 namespace App\Livewire\Caisses\Modals;
 
 use App\Models\SessionCaisse;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class FermerSession extends ModalComponent
@@ -23,6 +24,8 @@ class FermerSession extends ModalComponent
 
     public function fermer(): void
     {
+        Gate::authorize('Fermer Session Caisse');
+
         $this->validate(
             [
                 'fond_fermeture' => ['required', 'numeric', 'min:0'],

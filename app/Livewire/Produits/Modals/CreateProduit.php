@@ -4,6 +4,7 @@ namespace App\Livewire\Produits\Modals;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class CreateProduit extends ModalComponent
@@ -24,6 +25,8 @@ class CreateProduit extends ModalComponent
 
     public function create(): void
     {
+        Gate::authorize('Créer Produit');
+
         $this->validate(
             [
                 'name'         => ['required', 'string', 'max:255', 'unique:products,name'],

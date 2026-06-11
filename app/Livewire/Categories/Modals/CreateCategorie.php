@@ -3,6 +3,7 @@
 namespace App\Livewire\Categories\Modals;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class CreateCategorie extends ModalComponent
@@ -16,6 +17,8 @@ class CreateCategorie extends ModalComponent
 
     public function create(): void
     {
+        Gate::authorize('Créer Catégorie');
+
         $this->validate(
             ['name' => ['required', 'string', 'max:255', 'unique:categories,name']],
             [

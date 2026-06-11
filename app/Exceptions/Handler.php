@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -43,6 +44,15 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (AuthorizationException $e, $request) {
+            if ($request->header('X-Livewire')) {
+                return response()->json([
+                    'effects' => ['redirect' => route('dashboard')],
+                ], 403);
+            }
+            return response()->view('errors.403', [], 403);
         });
     }
 }

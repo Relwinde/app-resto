@@ -3,6 +3,7 @@
 namespace App\Livewire\Produits;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
@@ -25,6 +26,7 @@ class Produits extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('Supprimer Produit');
         $produit = Product::find($id);
         if ($produit) {
             $produit->delete();
@@ -37,6 +39,8 @@ class Produits extends Component
     #[On('produit-deleted')]
     public function render()
     {
+        Gate::authorize('Voir Produits');
+
         $produits = Product::with('category')
             ->where('name', 'like', "%{$this->search}%")
             ->orderBy('name')

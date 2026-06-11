@@ -7,10 +7,12 @@
             <div class="block-header">
                 <h3 class="block-title">{{ $pageHeader['subtitle'] }}</h3>
                 <div class="block-options">
+                    @can('Créer Approvisionnement')
                     <button wire:click="$dispatch('openModal', { component: 'approvisionnements.modals.create-approvisionnement' })"
                         class="btn btn-sm btn-primary">
                         <i class="fa fa-plus"></i> Nouvel approvisionnement
                     </button>
+                    @endcan
                 </div>
             </div>
 
@@ -67,16 +69,20 @@
                                             type="button" class="btn btn-sm btn-light" title="Voir les détails">
                                             <i class="fa fa-fw fa-eye"></i>
                                         </button>
+                                        @can('Modifier Approvisionnement')
                                         <button
                                             wire:click="$dispatch('openModal', { component: 'approvisionnements.modals.edit-approvisionnement', arguments: { approvisionnement: {{ $appro }} } })"
                                             type="button" class="btn btn-sm btn-light" title="Modifier">
                                             <i class="fa fa-fw fa-pencil-alt"></i>
                                         </button>
+                                        @endcan
+                                        @can('Supprimer Approvisionnement')
                                         <a wire:click.prevent="delete({{ $appro->id }})"
                                             wire:confirm="Supprimer cet approvisionnement ? Le stock du produit sera recalculé."
                                             type="button" class="btn btn-sm btn-light" title="Supprimer">
                                             <i class="fa fa-fw fa-trash"></i>
                                         </a>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

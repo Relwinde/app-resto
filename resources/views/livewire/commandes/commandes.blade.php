@@ -103,11 +103,14 @@
                                         @endswitch
                                     </td>
                                     <td class="text-center">
+                                        @can('Voir Détail Commande')
                                         <button type="button"
                                             wire:click="$dispatch('openModal', { component: 'commandes.modals.show-commande', arguments: { commande: {{ $commande->id }} } })"
                                             class="btn btn-sm btn-alt-secondary" title="Voir">
                                             <i class="fa fa-fw fa-eye"></i>
                                         </button>
+                                        @endcan
+                                        @can('Annuler Commande')
                                         @if ($commande->estModifiable())
                                             <button type="button"
                                                 wire:click="$dispatch('openModal', { component: 'commandes.modals.annuler-commande', arguments: { commande: {{ $commande->id }} } })"
@@ -115,6 +118,7 @@
                                                 <i class="fa fa-fw fa-ban"></i>
                                             </button>
                                         @endif
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

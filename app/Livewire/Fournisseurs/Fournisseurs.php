@@ -3,6 +3,7 @@
 namespace App\Livewire\Fournisseurs;
 
 use App\Models\Fournisseur;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
@@ -25,6 +26,7 @@ class Fournisseurs extends Component
 
     public function delete(int $id): void
     {
+        Gate::authorize('Supprimer Fournisseur');
         $fournisseur = Fournisseur::find($id);
         if ($fournisseur) {
             $fournisseur->delete();
@@ -37,6 +39,8 @@ class Fournisseurs extends Component
     #[On('fournisseur-deleted')]
     public function render()
     {
+        Gate::authorize('Voir Fournisseurs');
+
         $fournisseurs = Fournisseur::withCount('stockMovements')
             ->where(function ($query) {
                 $query->where('name', 'like', "%{$this->search}%")

@@ -7,10 +7,12 @@
             <div class="block-header">
                 <h3 class="block-title">{{ $pageHeader['subtitle'] }}</h3>
                 <div class="block-options">
+                    @can('Créer Produit')
                     <button wire:click="$dispatch('openModal', { component: 'produits.modals.create-produit' })"
                         class="btn btn-sm btn-primary">
                         <i class="fa fa-plus"></i> Ajouter un produit
                     </button>
+                    @endcan
                 </div>
             </div>
 
@@ -56,18 +58,24 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
+                                    @canany(['Modifier Produit', 'Supprimer Produit'])
                                     <div class="btn-group">
+                                        @can('Modifier Produit')
                                         <button
                                             wire:click="$dispatch('openModal', { component: 'produits.modals.edit-produit', arguments: { produit: {{ $produit }} } })"
                                             type="button" class="btn btn-sm btn-light" title="Modifier">
                                             <i class="fa fa-fw fa-pencil-alt"></i>
                                         </button>
+                                        @endcan
+                                        @can('Supprimer Produit')
                                         <a wire:click.prevent="delete({{ $produit->id }})"
                                             wire:confirm="Êtes-vous sûr de vouloir supprimer ce produit ?"
                                             type="button" class="btn btn-sm btn-light" title="Supprimer">
                                             <i class="fa fa-fw fa-trash"></i>
                                         </a>
+                                        @endcan
                                     </div>
+                                    @endcanany
                                 </td>
                             </tr>
                         @empty

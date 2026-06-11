@@ -5,6 +5,7 @@ namespace App\Livewire\Approvisionnements\Modals;
 use App\Models\Fournisseur;
 use App\Models\Product;
 use App\Models\StockMovement;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class EditApprovisionnement extends ModalComponent
@@ -21,6 +22,7 @@ class EditApprovisionnement extends ModalComponent
 
     public function mount(): void
     {
+        Gate::authorize('Modifier Approvisionnement');
         $this->product_id      = $this->approvisionnement->product_id;
         $this->fournisseur_id  = $this->approvisionnement->fournisseur_id;
         $this->quantite        = $this->approvisionnement->quantite;
@@ -40,6 +42,8 @@ class EditApprovisionnement extends ModalComponent
 
     public function save(): void
     {
+        Gate::authorize('Modifier Approvisionnement');
+
         $this->validate(
             [
                 'product_id'      => ['required', 'exists:products,id'],

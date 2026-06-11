@@ -26,17 +26,21 @@
                         </div>
                         <div>
                             @if ($sessionActive)
+                                @can('Fermer Session Caisse')
                                 <button type="button"
                                     wire:click="$dispatch('openModal', { component: 'caisses.modals.fermer-session', arguments: { session: {{ $sessionActive->id }} } })"
                                     class="btn btn-sm btn-danger">
                                     <i class="fa fa-fw fa-lock"></i> Fermer la session
                                 </button>
+                                @endcan
                             @else
+                                @can('Ouvrir Session Caisse')
                                 <button type="button"
                                     wire:click="$dispatch('openModal', { component: 'caisses.modals.ouvrir-session' })"
                                     class="btn btn-sm btn-success">
                                     <i class="fa fa-fw fa-unlock"></i> Ouvrir une session
                                 </button>
+                                @endcan
                             @endif
                         </div>
                     </div>

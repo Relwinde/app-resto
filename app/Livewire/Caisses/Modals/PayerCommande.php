@@ -5,6 +5,7 @@ namespace App\Livewire\Caisses\Modals;
 use App\Models\Caisse;
 use App\Models\Commande;
 use App\Models\CommandeProduit;
+use Illuminate\Support\Facades\Gate;
 use LivewireUI\Modal\ModalComponent;
 
 class PayerCommande extends ModalComponent
@@ -36,6 +37,8 @@ class PayerCommande extends ModalComponent
 
     public function payer(): void
     {
+        Gate::authorize('Encaisser Commande');
+
         $rules = [
             'mode_paiement' => ['required', 'in:especes,mobile_money'],
         ];

@@ -8,6 +8,7 @@ use App\Models\Commande;
 use App\Models\CommandeProduit;
 use App\Models\Product;
 use App\Models\SessionCaisse;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -22,6 +23,8 @@ class Caisses extends Component
 
     public function render()
     {
+        Gate::authorize('Voir Caisse');
+
         $caisse        = Caisse::where('statut', 'active')->first();
         $sessionActive = $caisse?->sessionActive();
 
@@ -106,6 +109,8 @@ class Caisses extends Component
 
     public function ouvrirPaiement(): void
     {
+        Gate::authorize('Encaisser Commande');
+
         if (empty($this->panier)) {
             return;
         }

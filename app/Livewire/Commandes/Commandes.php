@@ -3,6 +3,7 @@
 namespace App\Livewire\Commandes;
 
 use App\Models\Commande;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,6 +31,8 @@ class Commandes extends Component
 
     public function render()
     {
+        Gate::authorize('Voir Commandes');
+
         $commandes = Commande::with(['caisse', 'user', 'items'])
             ->when($this->search, function ($q) {
                 $q->where(function ($q2) {

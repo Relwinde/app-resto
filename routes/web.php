@@ -13,6 +13,8 @@ use App\Livewire\Caisses\Caisses;
 use App\Livewire\Caisses\Sessions;
 use App\Livewire\Caisses\Mouvements;
 use App\Livewire\Commandes\Commandes;
+use App\Livewire\Utilisateurs\Utilisateurs;
+use App\Livewire\Roles\Roles;
 
 Route::get('/', fn() => redirect()->route('dashboard'));
 Route::get('/dashboard', Dashboard::class)->name('dashboard')->middleware('auth');
@@ -24,6 +26,8 @@ Route::get('/caisse', Caisses::class)->name('caisse')->middleware('auth');
 Route::get('/caisse/sessions', Sessions::class)->name('caisse.sessions')->middleware('auth');
 Route::get('/caisse/mouvements', Mouvements::class)->name('caisse.mouvements')->middleware('auth');
 Route::get('/commandes', Commandes::class)->name('commandes')->middleware('auth');
+Route::get('/utilisateurs', Utilisateurs::class)->name('utilisateurs')->middleware('auth');
+Route::get('/roles', Roles::class)->name('roles')->middleware('auth');
 Route::get('/files/{file}', function (File $file) {
     abort_unless(Storage::disk('local')->exists($file->path), 404);
     return Storage::disk('local')->download($file->path, $file->original_name);

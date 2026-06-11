@@ -4,6 +4,7 @@ namespace App\Livewire\Caisses;
 
 use App\Models\Caisse;
 use App\Models\SessionCaisse;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,6 +15,8 @@ class Sessions extends Component
 
     public function render()
     {
+        Gate::authorize('Voir Sessions Caisse');
+
         $sessions = SessionCaisse::with(['caisse', 'user'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
