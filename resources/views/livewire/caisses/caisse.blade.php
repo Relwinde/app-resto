@@ -150,18 +150,21 @@
                                         'en_attente'     => 'badge-warning',
                                         'en_preparation' => 'badge-info',
                                         'servie'         => 'badge-primary',
+                                        'payee'          => 'badge-success',
                                         default          => 'badge-secondary',
                                     };
                                     $borderColor = match($commande->statut) {
                                         'en_attente'     => '#f0a30a',
                                         'en_preparation' => '#70b9eb',
                                         'servie'         => '#375a7f',
+                                        'payee'          => '#2d7d46',
                                         default          => '#e4e7ed',
                                     };
                                     $libelleStatut = match($commande->statut) {
                                         'en_attente'     => 'En attente',
                                         'en_preparation' => 'En préparation',
                                         'servie'         => 'Servie',
+                                        'payee'          => 'Payée',
                                         default          => $commande->statut,
                                     };
                                 @endphp
@@ -248,22 +251,33 @@
                                                     @endif
                                                 @endcan
 
-                                                @can('Encaisser Commande')
-                                                    @if ($sessionActive)
-                                                        <button type="button"
-                                                            wire:click="$dispatch('openModal', { component: 'caisses.modals.encaisser-commande', arguments: { commande: {{ $commande->id }} } })"
-                                                            class="btn btn-sm btn-success flex-grow-1">
-                                                            <i class="fa fa-fw fa-money-bill-wave"></i> Encaisser
-                                                        </button>
-                                                    @endif
-                                                @endcan
+                                                @if ($commande->statut !== 'payee')
+                                                    @can('Encaisser Commande')
+                                                        @if ($sessionActive)
+                                                            <button type="button"
+                                                                wire:click="$dispatch('openModal', { component: 'caisses.modals.encaisser-commande', arguments: { commande: {{ $commande->id }} } })"
+                                                                class="btn btn-sm btn-success flex-grow-1">
+                                                                <i class="fa fa-fw fa-money-bill-wave"></i> Encaisser
+                                                            </button>
+                                                        @endif
+                                                    @endcan
 
-                                                @can('Annuler Commande')
+                                                    @can('Annuler Commande')
+                                                        <button type="button"
+                                                            wire:click="$dispatch('openModal', { component: 'commandes.modals.annuler-commande', arguments: { commande: {{ $commande->id }} } })"
+                                                            class="btn btn-sm btn-alt-danger"
+                                                            title="Annuler">
+                                                            <i class="fa fa-fw fa-ban"></i>
+                                                        </button>
+                                                    @endcan
+                                                @endif
+
+                                                @can('Voir Détail Commande')
                                                     <button type="button"
-                                                        wire:click="$dispatch('openModal', { component: 'commandes.modals.annuler-commande', arguments: { commande: {{ $commande->id }} } })"
-                                                        class="btn btn-sm btn-alt-danger"
-                                                        title="Annuler">
-                                                        <i class="fa fa-fw fa-ban"></i>
+                                                        onclick="window.open('{{ route('commandes.recu', $commande->id) }}', '_blank', 'width=420,height=640,toolbar=0,menubar=0,location=0,scrollbars=yes')"
+                                                        class="btn btn-sm btn-alt-secondary"
+                                                        title="Imprimer le reçu">
+                                                        <i class="fa fa-fw fa-print"></i>
                                                     </button>
                                                 @endcan
 

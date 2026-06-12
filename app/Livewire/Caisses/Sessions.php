@@ -13,6 +13,8 @@ class Sessions extends Component
 {
     use WithPagination;
 
+    #[On('session-ouverte')]
+    #[On('session-fermee')]
     public function render()
     {
         Gate::authorize('Voir Sessions Caisse');

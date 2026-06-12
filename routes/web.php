@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 use App\Models\File;
 use App\Livewire\Dashboard;
 use App\Livewire\Login;
@@ -28,6 +29,11 @@ Route::get('/caisse/sessions', Sessions::class)->name('caisse.sessions')->middle
 Route::get('/caisse/mouvements', Mouvements::class)->name('caisse.mouvements')->middleware('auth');
 Route::get('/caisse/depenses', Depenses::class)->name('caisse.depenses')->middleware('auth');
 Route::get('/commandes', Commandes::class)->name('commandes')->middleware('auth');
+Route::get('/commandes/{commande}/recu', function (App\Models\Commande $commande) {
+    Gate::authorize('Voir Détail Commande');
+    $commande->loadMissing(['items.produit', 'caisse', 'user', 'mouvement']);
+    return view('commandes.recu', compact('commande'));
+})->name('commandes.recu')->middleware('auth');
 Route::get('/utilisateurs', Utilisateurs::class)->name('utilisateurs')->middleware('auth');
 Route::get('/roles', Roles::class)->name('roles')->middleware('auth');
 Route::get('/files/{file}', function (File $file) {

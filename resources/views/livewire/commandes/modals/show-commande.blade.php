@@ -3,6 +3,13 @@
         <div class="block-header block-header-default">
             <h3 class="block-title">Commande {{ $commande->numero }}</h3>
             <div class="block-options">
+                @can('Voir Détail Commande')
+                <button type="button"
+                    onclick="window.open('{{ route('commandes.recu', $commande->id) }}', '_blank', 'width=420,height=640,toolbar=0,menubar=0,location=0,scrollbars=yes')"
+                    class="btn btn-sm btn-alt-success mr-1">
+                    <i class="fa fa-fw fa-print"></i> Imprimer
+                </button>
+                @endcan
                 <button type="button" wire:click='$dispatch("closeModal")' class="btn btn-sm btn-alt-secondary">
                     Fermer
                 </button>

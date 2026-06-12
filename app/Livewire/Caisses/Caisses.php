@@ -20,6 +20,10 @@ class Caisses extends Component
     public string $table_numero = '';
     public string $client_nom   = '';
 
+    #[On('session-ouverte')]
+    #[On('depense-payee')]
+    #[On('commande-encaissee')]
+    #[On('session-fermee')]
     public function render()
     {
         Gate::authorize('Voir Caisse');
@@ -29,8 +33,9 @@ class Caisses extends Component
         $sessionActive = $caisseEspeces?->sessionActive();
 
         $commandes = Commande::with(['items.produit', 'user'])
-            ->whereIn('statut', ['en_attente', 'en_preparation', 'servie'])
-            ->orderBy('created_at', 'asc')
+            ->whereIn('statut', ['en_attente', 'en_preparation', 'servie', 'payee'])
+            ->when($sessionActive, fn ($q) => $q->where('session_caisse_id', $sessionActive->id))
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $produits = Product::with('category')
