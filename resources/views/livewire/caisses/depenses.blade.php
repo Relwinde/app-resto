@@ -44,6 +44,7 @@
                                 <th>Créé par</th>
                                 <th>Statut</th>
                                 <th>Caisse</th>
+                                <th>Fichiers</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -76,6 +77,19 @@
                                     <td>
                                         @if ($depense->caisse)
                                             <span class="font-size-sm">{{ $depense->caisse->nom }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($depense->files->isNotEmpty())
+                                            @foreach ($depense->files as $file)
+                                                <a href="{{ route('files.download', $file) }}" target="_blank"
+                                                    class="badge badge-light border mr-1 mb-1"
+                                                    title="{{ $file->original_name }}">
+                                                    <i class="fa fa-paperclip mr-1"></i>{{ Str::limit($file->original_name, 20) }}
+                                                </a>
+                                            @endforeach
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -128,6 +142,13 @@
                                                 @if ($depense->payePar) par {{ $depense->payePar->name }} @endif
                                             </span>
                                         @endif
+                                        @can('Modifier Dépense')
+                                        <button type="button"
+                                            wire:click="$dispatch('openModal', { component: 'caisses.modals.attach-file-depense', arguments: { depenseId: {{ $depense->id }} } })"
+                                            class="btn btn-sm btn-alt-secondary ml-1" title="Joindre un fichier">
+                                            <i class="fa fa-paperclip"></i>
+                                        </button>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

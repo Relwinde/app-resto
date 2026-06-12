@@ -81,7 +81,7 @@ class Depenses extends Component
     {
         Gate::authorize('Voir Dépenses');
 
-        $depenses = Depense::with(['caisse', 'user', 'validePar', 'payePar'])
+        $depenses = Depense::with(['caisse', 'user', 'validePar', 'payePar', 'files'])
             ->when($this->search, fn ($q) => $q->where('motif', 'like', "%{$this->search}%")
                 ->orWhere('beneficiaire', 'like', "%{$this->search}%"))
             ->when($this->statut, fn ($q) => $q->where('statut', $this->statut))
