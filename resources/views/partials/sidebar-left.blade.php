@@ -7,7 +7,7 @@
                 <i class="fa fa-circle-notch text-primary"></i>
             </span>
             <span class="smini-hide font-size-h5 tracking-wider">
-                RESTO
+                Le Sénévé
             </span>
         </a>
         <!-- END Logo -->

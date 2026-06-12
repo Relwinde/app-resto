@@ -17,7 +17,7 @@
                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                 @enderror
                                 <h2 class="h6 font-w400 text-muted mb-3">
-                                    Bienvenue sur RESTO, veuillez vous connecter
+                                    Bienvenue sur Restaurant Le Sénévé, veuillez vous connecter
                                 </h2>
                             </div>
                             <!-- END Header -->
@@ -60,7 +60,7 @@
 
             <!-- Footer -->
             <div class="font-size-sm text-center text-muted py-3">
-                <strong>RESTO</strong> &copy; {{ date('Y') }}
+                <strong>Restaurant Le Sénévé</strong> &copy; {{ date('Y') }}
             </div>
             <!-- END Footer -->
         </div>

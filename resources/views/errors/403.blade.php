@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESTO — Accès refusé</title>
+    <title>Le Sénévé — Accès refusé</title>
     <link rel="stylesheet" id="css-main" href="{{ asset('assets/css/oneui.min.css') }}">
 </head>
 <body class="bg-body-light">
