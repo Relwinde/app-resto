@@ -33,6 +33,48 @@ class Caisse extends Model
         return $this->sessions()->where('statut', 'ouverte')->latest()->first();
     }
 
+    public static function sessionOuverte(): bool
+    {
+        return static::where('statut', 'active')
+            ->whereHas('sessions', fn($q) => $q->where('statut', 'ouverte'))
+            ->exists();
+    }
+
+    public function retirer(
+        float $montant,
+        ?string $note = null,
+        ?int $stockMovementId = null,
+        ?int $depenseId = null,
+        string $type = 'retrait'
+    ): MouvementCaisse {
+        $soldeAvant = (float) $this->solde_actuel;
+
+        if ($montant > $soldeAvant) {
+            throw new \RuntimeException(
+                "Solde insuffisant dans la caisse « {$this->nom} » (solde : {$soldeAvant} FCFA, demandé : {$montant} FCFA)."
+            );
+        }
+
+        $soldeApres = $soldeAvant - $montant;
+
+        $mouvement = $this->mouvements()->create([
+            'session_caisse_id' => $this->sessionActive()?->id,
+            'stock_movement_id' => $stockMovementId,
+            'depense_id'        => $depenseId,
+            'user_id'           => auth()->id(),
+            'type'              => $type,
+            'montant'           => $montant,
+            'solde_avant'       => $soldeAvant,
+            'solde_apres'       => $soldeApres,
+            'mode_paiement'     => $this->type,
+            'note'              => $note,
+        ]);
+
+        $this->update(['solde_actuel' => $soldeApres]);
+
+        return $mouvement;
+    }
+
     public function encaisser(Commande $commande, array $paiement): MouvementCaisse
     {
         $soldeAvant = (float) $this->solde_actuel;

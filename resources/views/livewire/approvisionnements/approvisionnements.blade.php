@@ -8,10 +8,17 @@
                 <h3 class="block-title">{{ $pageHeader['subtitle'] }}</h3>
                 <div class="block-options">
                     @can('Créer Approvisionnement')
+                    @if ($sessionOuverte)
                     <button wire:click="$dispatch('openModal', { component: 'approvisionnements.modals.create-approvisionnement' })"
                         class="btn btn-sm btn-primary">
                         <i class="fa fa-plus"></i> Nouvel approvisionnement
                     </button>
+                    @else
+                    <button class="btn btn-sm btn-secondary" disabled
+                        title="Ouvrez une session de caisse pour créer un approvisionnement">
+                        <i class="fa fa-lock mr-1"></i> Nouvel approvisionnement
+                    </button>
+                    @endif
                     @endcan
                 </div>
             </div>

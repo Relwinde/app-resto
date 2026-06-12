@@ -45,7 +45,9 @@ class Mouvements extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        $caisses = Caisse::orderBy('nom')->get();
+        $caisses       = Caisse::orderBy('nom')->get();
+        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
 
         $pageHeader = [
             'title'       => 'Journal de caisse',
@@ -57,7 +59,7 @@ class Mouvements extends Component
             ],
         ];
 
-        return view('livewire.caisses.mouvements', compact('mouvements', 'caisses', 'caisse', 'pageHeader'))
+        return view('livewire.caisses.mouvements', compact('mouvements', 'caisses', 'caisse', 'caisseEspeces', 'caisseMobile', 'pageHeader'))
             ->layout('components.layouts.app', ['title' => 'Journal de caisse']);
     }
 }

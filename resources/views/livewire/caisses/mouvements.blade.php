@@ -3,36 +3,40 @@
 
     <div class="content">
 
-        @if ($caisse)
-            <div class="row mb-4">
-                <div class="col-sm-4">
-                    <div class="block block-rounded text-center py-3 mb-0">
-                        <p class="text-muted small mb-1">Caisse</p>
-                        <p class="font-w700 mb-0">{{ $caisse->nom }}</p>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="block block-rounded text-center py-3 mb-0">
-                        <p class="text-muted small mb-1">Solde actuel</p>
-                        <p class="font-w700 font-size-h4 text-success mb-0">
-                            {{ number_format($caisse->solde_actuel, 0, ',', ' ') }} FCFA
-                        </p>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="block block-rounded text-center py-3 mb-0">
-                        <p class="text-muted small mb-1">Session</p>
-                        <p class="mb-0">
-                            @if ($caisse->sessionActive())
-                                <span class="badge badge-success">Ouverte</span>
-                            @else
-                                <span class="badge badge-secondary">Fermée</span>
-                            @endif
-                        </p>
-                    </div>
+        <div class="row mb-4">
+            <div class="col-sm-4">
+                <div class="block block-rounded text-center py-3 mb-0">
+                    <p class="text-muted small mb-1">
+                        <i class="fa fa-coins text-warning mr-1"></i> Solde Espèces
+                    </p>
+                    <p class="font-w700 font-size-h4 text-success mb-0">
+                        {{ number_format($caisseEspeces?->solde_actuel ?? 0, 0, ',', ' ') }} FCFA
+                    </p>
                 </div>
             </div>
-        @endif
+            <div class="col-sm-4">
+                <div class="block block-rounded text-center py-3 mb-0">
+                    <p class="text-muted small mb-1">
+                        <i class="fa fa-mobile-alt text-primary mr-1"></i> Solde Mobile Money
+                    </p>
+                    <p class="font-w700 font-size-h4 text-success mb-0">
+                        {{ number_format($caisseMobile?->solde_actuel ?? 0, 0, ',', ' ') }} FCFA
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="block block-rounded text-center py-3 mb-0">
+                    <p class="text-muted small mb-1">Session</p>
+                    <p class="mb-0">
+                        @if ($caisseEspeces?->sessionActive())
+                            <span class="badge badge-success">Ouverte</span>
+                        @else
+                            <span class="badge badge-secondary">Fermée</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <div class="block block-rounded">
             <div class="block-header block-header-default">
@@ -57,6 +61,7 @@
                             <option value="fermeture">Fermeture</option>
                             <option value="depot">Dépôt</option>
                             <option value="retrait">Retrait</option>
+                            <option value="depense">Dépense</option>
                         </select>
                     </div>
                     <div class="col-sm-2">
@@ -110,6 +115,9 @@
                                             @case('retrait')
                                                 <span class="badge badge-warning">Retrait</span>
                                                 @break
+                                            @case('depense')
+                                                <span class="badge badge-danger">Dépense</span>
+                                                @break
                                         @endswitch
                                     </td>
                                     <td>
@@ -129,8 +137,8 @@
                                         @endif
                                     </td>
                                     <td class="text-right">{{ number_format($mouvement->solde_avant, 0, ',', ' ') }}</td>
-                                    <td class="text-right font-w600 {{ $mouvement->type === 'retrait' ? 'text-danger' : 'text-success' }}">
-                                        {{ $mouvement->type === 'retrait' ? '-' : '+' }}{{ number_format($mouvement->montant, 0, ',', ' ') }}
+                                    <td class="text-right font-w600 {{ in_array($mouvement->type, ['retrait', 'depense']) ? 'text-danger' : 'text-success' }}">
+                                        {{ in_array($mouvement->type, ['retrait', 'depense']) ? '-' : '+' }}{{ number_format($mouvement->montant, 0, ',', ' ') }}
                                     </td>
                                     <td class="text-right font-w600">{{ number_format($mouvement->solde_apres, 0, ',', ' ') }}</td>
                                     <td>{{ $mouvement->user->name }}</td>

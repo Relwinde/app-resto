@@ -4,7 +4,9 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Nouveau rôle</h3>
                 <div class="block-options">
+                    @can('Créer Rôle')
                     <button type="submit" class="btn btn-sm btn-primary">Enregistrer</button>
+                    @endcan
                     <div wire:loading wire:target="create" class="spinner-border spinner-border-sm text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>

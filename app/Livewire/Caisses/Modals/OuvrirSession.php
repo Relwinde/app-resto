@@ -10,48 +10,44 @@ use LivewireUI\Modal\ModalComponent;
 
 class OuvrirSession extends ModalComponent
 {
-    public string $fond_especes   = '';
-    public string $fond_mobile    = '';
     public string $note_ouverture = '';
+
+    public function render()
+    {
+        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+
+        return view('livewire.caisses.modals.ouvrir-session', [
+            'soldeEspeces' => (float) ($caisseEspeces?->solde_actuel ?? 0),
+            'soldeMobile'  => (float) ($caisseMobile?->solde_actuel ?? 0),
+        ]);
+    }
 
     public function ouvrir(): void
     {
         Gate::authorize('Ouvrir Session Caisse');
 
         $this->validate(
-            [
-                'fond_especes' => ['required', 'numeric', 'min:0'],
-                'fond_mobile'  => ['required', 'numeric', 'min:0'],
-                'note_ouverture' => ['nullable', 'string', 'max:500'],
-            ],
-            [
-                'fond_especes.required' => 'Le fond d\'ouverture espèces est obligatoire.',
-                'fond_especes.min'      => 'Le fond espèces doit être positif ou nul.',
-                'fond_mobile.required'  => 'Le fond d\'ouverture mobile money est obligatoire.',
-                'fond_mobile.min'       => 'Le fond mobile doit être positif ou nul.',
-            ]
+            ['note_ouverture' => ['nullable', 'string', 'max:500']]
         );
 
         $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->firstOrFail();
         $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->firstOrFail();
 
         if ($caisseEspeces->sessionActive()) {
-            $this->addError('fond_especes', 'Une session est déjà ouverte pour la caisse espèces.');
+            $this->dispatch('notify', message: 'Une session est déjà ouverte pour la caisse espèces.', type: 'error');
             return;
         }
         if ($caisseMobile->sessionActive()) {
-            $this->addError('fond_mobile', 'Une session est déjà ouverte pour la caisse mobile money.');
+            $this->dispatch('notify', message: 'Une session est déjà ouverte pour la caisse mobile money.', type: 'error');
             return;
         }
 
         DB::transaction(function () use ($caisseEspeces, $caisseMobile) {
             $note = $this->note_ouverture ?: null;
 
-            foreach ([
-                [$caisseEspeces, (float) $this->fond_especes],
-                [$caisseMobile,  (float) $this->fond_mobile],
-            ] as [$caisse, $fond]) {
-                $soldeAvant = (float) $caisse->solde_actuel;
+            foreach ([$caisseEspeces, $caisseMobile] as $caisse) {
+                $fond = (float) $caisse->solde_actuel;
 
                 $session = SessionCaisse::create([
                     'caisse_id'      => $caisse->id,
@@ -66,12 +62,10 @@ class OuvrirSession extends ModalComponent
                     'user_id'           => auth()->id(),
                     'type'              => 'ouverture',
                     'montant'           => $fond,
-                    'solde_avant'       => $soldeAvant,
-                    'solde_apres'       => $soldeAvant + $fond,
+                    'solde_avant'       => $fond,
+                    'solde_apres'       => $fond,
                     'note'              => $note,
                 ]);
-
-                $caisse->update(['solde_actuel' => $soldeAvant + $fond]);
             }
         });
 

@@ -36,12 +36,6 @@
                                     <strong>{{ $caisseEspeces->nom }}</strong>
                                     <div class="text-muted small">
                                         Solde : <strong class="text-dark">{{ number_format($caisseEspeces->solde_actuel, 0, ',', ' ') }} FCFA</strong>
-                                        @if ($sessionActive)
-                                            &mdash; <span class="badge badge-success">Session ouverte</span>
-                                            <span class="ml-1">depuis {{ $sessionActive->created_at->format('H:i') }} ({{ $sessionActive->user->name }})</span>
-                                        @else
-                                            &mdash; <span class="badge badge-secondary">Aucune session</span>
-                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -73,6 +67,10 @@
                                     <i class="fa fa-fw fa-lock"></i> Fermer session
                                 </button>
                                 @endcan
+                                <div class="mt-2 small text-muted">
+                                    <span class="badge badge-success">Session ouverte</span>
+                                    <span class="ml-1">depuis {{ $sessionActive->created_at->format('H:i') }} ({{ $sessionActive->user->name }})</span>
+                                </div>
                             @else
                                 @can('Ouvrir Session Caisse')
                                 <button type="button"
@@ -81,6 +79,9 @@
                                     <i class="fa fa-fw fa-unlock"></i> Ouvrir session
                                 </button>
                                 @endcan
+                                <div class="mt-2 small text-muted">
+                                    <span class="badge badge-secondary">Aucune session</span>
+                                </div>
                             @endif
                         </div>
 

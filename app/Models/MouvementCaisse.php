@@ -10,7 +10,7 @@ class MouvementCaisse extends Model
     protected $table = 'mouvements_caisse';
 
     protected $fillable = [
-        'caisse_id', 'session_caisse_id', 'commande_id', 'user_id',
+        'caisse_id', 'session_caisse_id', 'commande_id', 'stock_movement_id', 'depense_id', 'user_id',
         'type', 'montant', 'solde_avant', 'solde_apres',
         'mode_paiement', 'montant_recu', 'monnaie_rendue', 'reference_mobile', 'note',
     ];
@@ -36,6 +36,16 @@ class MouvementCaisse extends Model
     public function commande(): BelongsTo
     {
         return $this->belongsTo(Commande::class);
+    }
+
+    public function stockMovement(): BelongsTo
+    {
+        return $this->belongsTo(StockMovement::class);
+    }
+
+    public function depense(): BelongsTo
+    {
+        return $this->belongsTo(Depense::class);
     }
 
     public function user(): BelongsTo

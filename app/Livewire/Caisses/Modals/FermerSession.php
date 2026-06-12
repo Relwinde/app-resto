@@ -9,18 +9,7 @@ use LivewireUI\Modal\ModalComponent;
 
 class FermerSession extends ModalComponent
 {
-    public string $fond_fermeture_especes = '';
-    public string $fond_fermeture_mobile  = '';
-    public string $note_fermeture         = '';
-
-    public function mount(): void
-    {
-        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
-        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
-
-        $this->fond_fermeture_especes = (string) (int) ($caisseEspeces?->solde_actuel ?? 0);
-        $this->fond_fermeture_mobile  = (string) (int) ($caisseMobile?->solde_actuel ?? 0);
-    }
+    public string $note_fermeture = '';
 
     public function render()
     {
@@ -42,6 +31,7 @@ class FermerSession extends ModalComponent
                 ->when($sessionMobile, fn ($q) => $q->where('created_at', '>=', $sessionMobile->created_at))
                 ->sum('montant')
             : 0;
+
         $soldeEspeces = (float) ($caisseEspeces?->solde_actuel ?? 0);
         $soldeMobile  = (float) ($caisseMobile?->solde_actuel ?? 0);
         $nbCommandes  = $sessionEspeces
@@ -58,17 +48,7 @@ class FermerSession extends ModalComponent
         Gate::authorize('Fermer Session Caisse');
 
         $this->validate(
-            [
-                'fond_fermeture_especes' => ['required', 'numeric', 'min:0'],
-                'fond_fermeture_mobile'  => ['required', 'numeric', 'min:0'],
-                'note_fermeture'         => ['nullable', 'string', 'max:500'],
-            ],
-            [
-                'fond_fermeture_especes.required' => 'Le fond de fermeture espèces est obligatoire.',
-                'fond_fermeture_especes.min'      => 'Le fond espèces doit être positif ou nul.',
-                'fond_fermeture_mobile.required'  => 'Le fond de fermeture mobile money est obligatoire.',
-                'fond_fermeture_mobile.min'       => 'Le fond mobile doit être positif ou nul.',
-            ]
+            ['note_fermeture' => ['nullable', 'string', 'max:500']]
         );
 
         $caisseEspeces  = Caisse::where('type', 'especes')->where('statut', 'active')->first();
@@ -77,18 +57,18 @@ class FermerSession extends ModalComponent
         $sessionMobile  = $caisseMobile?->sessionActive();
 
         if (! $sessionEspeces && ! $sessionMobile) {
-            $this->addError('fond_fermeture_especes', 'Aucune session ouverte à fermer.');
+            $this->dispatch('notify', message: 'Aucune session ouverte à fermer.', type: 'error');
             return;
         }
 
         $note = $this->note_fermeture ?: null;
 
-        DB::transaction(function () use ($sessionEspeces, $sessionMobile, $note) {
+        DB::transaction(function () use ($sessionEspeces, $sessionMobile, $caisseEspeces, $caisseMobile, $note) {
             if ($sessionEspeces) {
-                $sessionEspeces->fermer((float) $this->fond_fermeture_especes, $note);
+                $sessionEspeces->fermer((float) $caisseEspeces->solde_actuel, $note);
             }
             if ($sessionMobile) {
-                $sessionMobile->fermer((float) $this->fond_fermeture_mobile, $note);
+                $sessionMobile->fermer((float) $caisseMobile->solde_actuel, $note);
             }
         });
 

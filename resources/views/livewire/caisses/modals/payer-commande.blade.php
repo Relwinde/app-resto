@@ -4,9 +4,11 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Encaissement</h3>
                 <div class="block-options">
+                    @can('Encaisser Commande')
                     <button type="submit" class="btn btn-sm btn-success">
                         <i class="fa fa-fw fa-check"></i> Valider
                     </button>
+                    @endcan
                     <div wire:loading wire:target="payer" class="spinner-border spinner-border-sm text-success" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>

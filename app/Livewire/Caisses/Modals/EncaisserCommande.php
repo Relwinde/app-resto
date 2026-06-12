@@ -19,6 +19,11 @@ class EncaisserCommande extends ModalComponent
 
     public function mount(): void
     {
+        if (! Caisse::sessionOuverte()) {
+            $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
+            $this->closeModal();
+            return;
+        }
         Gate::authorize('Encaisser Commande');
         $this->commande->loadMissing(['items.produit', 'caisse']);
     }
@@ -32,6 +37,12 @@ class EncaisserCommande extends ModalComponent
     public function encaisser(): void
     {
         Gate::authorize('Encaisser Commande');
+
+        if (! Caisse::sessionOuverte()) {
+            $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
+            $this->closeModal();
+            return;
+        }
 
         $rules = [
             'mode_paiement' => ['required', 'in:especes,mobile_money'],

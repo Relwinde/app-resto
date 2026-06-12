@@ -91,6 +91,14 @@
                         </a>
                     </li>
                     @endcan
+                    @can('Voir Dépenses')
+                    <li class="nav-main-item">
+                        <a class="nav-main-link {{ request()->routeIs('caisse.depenses') ? 'active' : '' }}" href="{{ route('caisse.depenses') }}" wire:navigate>
+                            <i class="nav-main-link-icon fa fa-file-invoice-dollar"></i>
+                            <span class="nav-main-link-name">Dépenses</span>
+                        </a>
+                    </li>
+                    @endcan
                 </ul>
             </li>
             @endcanany

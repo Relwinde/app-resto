@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Approvisionnements\Modals;
 
+use App\Models\Caisse;
 use App\Models\Fournisseur;
 use App\Models\Product;
 use App\Models\StockMovement;
@@ -15,6 +16,7 @@ class CreateApprovisionnement extends ModalComponent
 
     public $product_id      = '';
     public $fournisseur_id  = '';
+    public $caisse_id       = '';
     public $quantite        = '';
     public $prix_achat      = '';
     public $date_peremption = '';
@@ -22,11 +24,20 @@ class CreateApprovisionnement extends ModalComponent
     public $note            = '';
     public $fichier         = null;
 
+    public function mount(): void
+    {
+        if (! Caisse::sessionOuverte()) {
+            $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
+            $this->closeModal();
+        }
+    }
+
     public function render()
     {
         return view('livewire.approvisionnements.modals.create-approvisionnement', [
             'produits'     => Product::where('is_suppliable', true)->orderBy('name')->get(),
             'fournisseurs' => Fournisseur::orderBy('name')->get(),
+            'caisses'      => Caisse::where('statut', 'active')->orderBy('nom')->get(),
         ]);
     }
 
@@ -39,10 +50,17 @@ class CreateApprovisionnement extends ModalComponent
     {
         Gate::authorize('Créer Approvisionnement');
 
+        if (! Caisse::sessionOuverte()) {
+            $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
+            $this->closeModal();
+            return;
+        }
+
         $this->validate(
             [
                 'product_id'      => ['required', 'exists:products,id'],
                 'fournisseur_id'  => ['nullable', 'exists:fournisseurs,id'],
+                'caisse_id'       => ['nullable', 'exists:caisses,id'],
                 'quantite'        => ['required', 'numeric', 'min:0.01'],
                 'prix_achat'      => ['required', 'numeric', 'min:0'],
                 'date_peremption' => ['nullable', 'date'],
@@ -61,9 +79,28 @@ class CreateApprovisionnement extends ModalComponent
             ]
         );
 
+        // Vérification du solde caisse avant toute création
+        $caisse  = null;
+        $montant = 0;
+
+        if ($this->caisse_id) {
+            $caisse  = Caisse::findOrFail($this->caisse_id);
+            $montant = round((float) $this->quantite * (float) $this->prix_achat, 2);
+
+            if ($montant > 0 && $montant > (float) $caisse->solde_actuel) {
+                $this->addError(
+                    'caisse_id',
+                    'Solde insuffisant dans la caisse « ' . $caisse->nom . ' » ('
+                        . number_format($caisse->solde_actuel, 0, ',', ' ') . ' FCFA disponible).'
+                );
+                return;
+            }
+        }
+
         $mouvement = StockMovement::create([
             'product_id'      => $this->product_id,
             'fournisseur_id'  => $this->fournisseur_id ?: null,
+            'caisse_id'       => $this->caisse_id ?: null,
             'quantite'        => $this->quantite,
             'prix_achat'      => $this->prix_achat ?: null,
             'date_peremption' => $this->date_peremption ?: null,
@@ -83,6 +120,10 @@ class CreateApprovisionnement extends ModalComponent
                 'mime_type'     => $this->fichier->getMimeType(),
                 'size'          => $this->fichier->getSize(),
             ]);
+        }
+
+        if ($caisse && $montant > 0) {
+            $caisse->retirer($montant, $mouvement->note, $mouvement->id);
         }
 
         $this->dispatch('approvisionnement-created');

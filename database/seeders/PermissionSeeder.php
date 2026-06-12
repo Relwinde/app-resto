@@ -30,6 +30,8 @@ class PermissionSeeder extends Seeder
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             // Journal
             'Voir Journal Caisse',
+            // Dépenses
+            'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense', 'Valider Dépense', 'Payer Dépense', 'Supprimer Dépense',
             // Utilisateurs
             'Voir Utilisateurs', 'Créer Utilisateur', 'Modifier Utilisateur', 'Supprimer Utilisateur',
             // Rôles
@@ -54,6 +56,7 @@ class PermissionSeeder extends Seeder
             'Voir Activité Caisse', 'Changer Statut Commande',
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             'Voir Journal Caisse',
+            'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense', 'Payer Dépense',
         ]);
 
         // magasinier
@@ -63,6 +66,7 @@ class PermissionSeeder extends Seeder
             'Voir Catégories', 'Créer Catégorie', 'Modifier Catégorie', 'Supprimer Catégorie',
             'Voir Fournisseurs', 'Créer Fournisseur', 'Modifier Fournisseur', 'Supprimer Fournisseur',
             'Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement',
+            'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense',
         ]);
     }
 }

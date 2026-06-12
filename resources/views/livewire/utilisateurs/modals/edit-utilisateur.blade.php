@@ -4,7 +4,9 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Modifier l'utilisateur</h3>
                 <div class="block-options">
+                    @can('Modifier Utilisateur')
                     <button type="submit" class="btn btn-sm btn-primary">Enregistrer</button>
+                    @endcan
                     <div wire:loading wire:target="save" class="spinner-border spinner-border-sm text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>

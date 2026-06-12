@@ -4,9 +4,11 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Annuler la commande {{ $commande->numero }}</h3>
                 <div class="block-options">
+                    @can('Annuler Commande')
                     <button type="submit" class="btn btn-sm btn-danger">
                         <i class="fa fa-fw fa-ban"></i> Confirmer l'annulation
                     </button>
+                    @endcan
                     <div wire:loading wire:target="annuler" class="spinner-border spinner-border-sm text-danger" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>

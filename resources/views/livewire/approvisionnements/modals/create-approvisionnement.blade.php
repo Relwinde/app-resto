@@ -4,9 +4,11 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Nouvel Approvisionnement</h3>
                 <div class="block-options">
+                    @can('Créer Approvisionnement')
                     <button type="submit" class="btn btn-sm btn-primary">
                         Enregistrer
                     </button>
+                    @endcan
                     <div wire:loading wire:target="create" class="spinner-border spinner-border-sm text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
@@ -54,7 +56,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="quantite">Quantité reçue <span class="text-danger">*</span></label>
-                                <input wire:model="quantite" type="number" step="0.01" min="0.01"
+                                <input wire:model.live="quantite" type="number" step="0.01" min="0.01"
                                     class="form-control form-control-alt" id="quantite" placeholder="0.00">
                                 @error('quantite')
                                     <div class="text-danger small">{{ $message }}</div>
@@ -64,12 +66,44 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="prix_achat">Prix d'achat unitaire</label>
-                                <input wire:model="prix_achat" type="number" step="0.01" min="0"
+                                <input wire:model.live="prix_achat" type="number" step="0.01" min="0"
                                     class="form-control form-control-alt" id="prix_achat" placeholder="0.00">
                                 @error('prix_achat')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="caisse_id">
+                                    <i class="fa fa-cash-register mr-1"></i>
+                                    Caisse débitée <span class="text-muted font-w400">(optionnel)</span>
+                                </label>
+                                <select wire:model.live="caisse_id" class="form-control form-control-alt @error('caisse_id') is-invalid @enderror" id="caisse_id">
+                                    <option value="">-- Aucune déduction caisse --</option>
+                                    @foreach ($caisses as $caisse)
+                                        <option value="{{ $caisse->id }}">
+                                            {{ $caisse->nom }}
+                                            ({{ number_format($caisse->solde_actuel, 0, ',', ' ') }} FCFA)
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('caisse_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            @if ($caisse_id && $quantite && $prix_achat && (float)$quantite > 0 && (float)$prix_achat > 0)
+                                <div class="alert alert-warning w-100 py-2 mb-3">
+                                    <i class="fa fa-exclamation-triangle mr-1"></i>
+                                    Montant à déduire :
+                                    <strong>{{ number_format((float)$quantite * (float)$prix_achat, 0, ',', ' ') }} FCFA</strong>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

@@ -117,6 +117,7 @@
             <button type="button" wire:click="closeModal" class="btn btn-alt-secondary">
                 <i class="fa fa-fw fa-arrow-left"></i> Retour
             </button>
+            @can('Encaisser Commande')
             <button type="button" wire:click="encaisser"
                 wire:loading.attr="disabled"
                 class="btn btn-success">
@@ -127,6 +128,7 @@
                     <i class="fa fa-fw fa-spinner fa-spin"></i> Traitement...
                 </span>
             </button>
+            @endcan
         </div>
     </div>
 </div>

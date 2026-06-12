@@ -59,6 +59,18 @@
     @livewireScripts
     @livewire('wire-elements-modal')
     @stack('js')
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('notify', ({ message, type }) => {
+                $.notify({ message }, {
+                    type: type === 'error' ? 'danger' : (type || 'info'),
+                    placement: { from: 'top', align: 'right' },
+                    delay: 4000,
+                    animate: { enter: 'animated fadeInDown', exit: 'animated fadeOutUp' },
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

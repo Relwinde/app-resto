@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Approvisionnements;
 
+use App\Models\Caisse;
 use App\Models\StockMovement;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -61,6 +62,7 @@ class Approvisionnements extends Component
         return view('livewire.approvisionnements.approvisionnements', [
             'approvisionnements' => $approvisionnements,
             'pageHeader'         => $pageHeader,
+            'sessionOuverte'     => Caisse::sessionOuverte(),
         ])->layout('components.layouts.app', ['title' => 'Approvisionnements']);
     }
 }

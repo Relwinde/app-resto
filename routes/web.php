@@ -12,6 +12,7 @@ use App\Livewire\Fournisseurs\Fournisseurs;
 use App\Livewire\Caisses\Caisses;
 use App\Livewire\Caisses\Sessions;
 use App\Livewire\Caisses\Mouvements;
+use App\Livewire\Caisses\Depenses;
 use App\Livewire\Commandes\Commandes;
 use App\Livewire\Utilisateurs\Utilisateurs;
 use App\Livewire\Roles\Roles;
@@ -25,6 +26,7 @@ Route::get('/fournisseurs', Fournisseurs::class)->name('fournisseurs')->middlewa
 Route::get('/caisse', Caisses::class)->name('caisse')->middleware('auth');
 Route::get('/caisse/sessions', Sessions::class)->name('caisse.sessions')->middleware('auth');
 Route::get('/caisse/mouvements', Mouvements::class)->name('caisse.mouvements')->middleware('auth');
+Route::get('/caisse/depenses', Depenses::class)->name('caisse.depenses')->middleware('auth');
 Route::get('/commandes', Commandes::class)->name('commandes')->middleware('auth');
 Route::get('/utilisateurs', Utilisateurs::class)->name('utilisateurs')->middleware('auth');
 Route::get('/roles', Roles::class)->name('roles')->middleware('auth');

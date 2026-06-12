@@ -11,6 +11,7 @@ class StockMovement extends Model
     protected $fillable = [
         'product_id',
         'fournisseur_id',
+        'caisse_id',
         'quantite',
         'prix_achat',
         'date_peremption',
@@ -32,6 +33,11 @@ class StockMovement extends Model
     public function fournisseur(): BelongsTo
     {
         return $this->belongsTo(Fournisseur::class);
+    }
+
+    public function caisse(): BelongsTo
+    {
+        return $this->belongsTo(Caisse::class);
     }
 
     public function files(): MorphMany

@@ -3,9 +3,11 @@
         <div class="block-header block-header-default">
             <h3 class="block-title">Permissions du rôle : <strong>{{ $role->name }}</strong></h3>
             <div class="block-options">
+                @can('Modifier Rôle')
                 <button type="button" wire:click="save" class="btn btn-sm btn-primary">
                     <i class="fa fa-fw fa-save mr-1"></i> Enregistrer
                 </button>
+                @endcan
                 <div wire:loading wire:target="save" class="spinner-border spinner-border-sm text-primary" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>

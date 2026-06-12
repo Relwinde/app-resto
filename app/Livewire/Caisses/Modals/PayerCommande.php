@@ -39,6 +39,12 @@ class PayerCommande extends ModalComponent
     {
         Gate::authorize('Encaisser Commande');
 
+        if (! Caisse::sessionOuverte()) {
+            $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
+            $this->closeModal();
+            return;
+        }
+
         $rules = [
             'mode_paiement' => ['required', 'in:especes,mobile_money'],
         ];

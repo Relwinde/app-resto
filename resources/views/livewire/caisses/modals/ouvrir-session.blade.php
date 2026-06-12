@@ -4,9 +4,11 @@
             <div class="block-header block-header-default">
                 <h3 class="block-title">Ouvrir une session de caisse</h3>
                 <div class="block-options">
+                    @can('Ouvrir Session Caisse')
                     <button type="submit" class="btn btn-sm btn-success">
                         <i class="fa fa-fw fa-unlock"></i> Ouvrir
                     </button>
+                    @endcan
                     <div wire:loading wire:target="ouvrir" class="spinner-border spinner-border-sm text-success" role="status">
                         <span class="sr-only">Chargement...</span>
                     </div>
@@ -19,33 +21,26 @@
             <div class="block-content">
                 <div class="py-sm-3 py-md-4">
 
-                    <div class="row">
+                    {{-- Soldes actuels (lecture seule) --}}
+                    <div class="row mb-4">
                         <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="fond_especes">
-                                    <i class="fa fa-coins text-warning mr-1"></i>
-                                    Fond d'ouverture — Espèces (FCFA) <span class="text-danger">*</span>
-                                </label>
-                                <input wire:model="fond_especes" type="number" step="1" min="0"
-                                    class="form-control form-control-alt @error('fond_especes') is-invalid @enderror"
-                                    id="fond_especes" placeholder="0">
-                                @error('fond_especes')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="bg-body-light rounded p-3 text-center">
+                                <p class="text-muted small mb-1">
+                                    <i class="fa fa-coins text-warning mr-1"></i> Solde Espèces
+                                </p>
+                                <p class="font-w700 font-size-lg mb-0">
+                                    {{ number_format($soldeEspeces, 0, ',', ' ') }} <small class="font-w400">FCFA</small>
+                                </p>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="fond_mobile">
-                                    <i class="fa fa-mobile-alt text-primary mr-1"></i>
-                                    Fond d'ouverture — Mobile Money (FCFA) <span class="text-danger">*</span>
-                                </label>
-                                <input wire:model="fond_mobile" type="number" step="1" min="0"
-                                    class="form-control form-control-alt @error('fond_mobile') is-invalid @enderror"
-                                    id="fond_mobile" placeholder="0">
-                                @error('fond_mobile')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="bg-body-light rounded p-3 text-center">
+                                <p class="text-muted small mb-1">
+                                    <i class="fa fa-mobile-alt text-primary mr-1"></i> Solde Mobile Money
+                                </p>
+                                <p class="font-w700 font-size-lg mb-0">
+                                    {{ number_format($soldeMobile, 0, ',', ' ') }} <small class="font-w400">FCFA</small>
+                                </p>
                             </div>
                         </div>
                     </div>
