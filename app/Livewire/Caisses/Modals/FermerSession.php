@@ -13,8 +13,9 @@ class FermerSession extends ModalComponent
 
     public function render()
     {
-        $caisseEspeces  = Caisse::where('type', 'especes')->where('statut', 'active')->first();
-        $caisseMobile   = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+        $restaurantId   = auth()->user()->restaurant_id;
+        $caisseEspeces  = Caisse::forRestaurant($restaurantId)->where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile   = Caisse::forRestaurant($restaurantId)->where('type', 'mobile_money')->where('statut', 'active')->first();
         $sessionEspeces = $caisseEspeces?->sessionActive();
         $sessionMobile  = $caisseMobile?->sessionActive();
 
@@ -47,12 +48,14 @@ class FermerSession extends ModalComponent
     {
         Gate::authorize('Fermer Session Caisse');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate(
             ['note_fermeture' => ['nullable', 'string', 'max:500']]
         );
 
-        $caisseEspeces  = Caisse::where('type', 'especes')->where('statut', 'active')->first();
-        $caisseMobile   = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+        $caisseEspeces  = Caisse::forRestaurant($restaurantId)->where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile   = Caisse::forRestaurant($restaurantId)->where('type', 'mobile_money')->where('statut', 'active')->first();
         $sessionEspeces = $caisseEspeces?->sessionActive();
         $sessionMobile  = $caisseMobile?->sessionActive();
 

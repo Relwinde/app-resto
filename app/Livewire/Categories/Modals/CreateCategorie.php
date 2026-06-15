@@ -19,15 +19,19 @@ class CreateCategorie extends ModalComponent
     {
         Gate::authorize('Créer Catégorie');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate(
-            ['name' => ['required', 'string', 'max:255', 'unique:categories,name']],
+            ['name' => ['required', 'string', 'max:255']],
             [
                 'name.required' => 'Le nom de la catégorie est obligatoire.',
-                'name.unique'   => 'Cette catégorie existe déjà.',
             ]
         );
 
-        Category::create(['name' => $this->name]);
+        Category::create([
+            'restaurant_id' => $restaurantId,
+            'name'          => $this->name,
+        ]);
 
         $this->dispatch('categorie-created');
         $this->reset();

@@ -7,15 +7,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Caisse extends Model
 {
-    protected $fillable = ['nom', 'type', 'solde_actuel', 'statut'];
+    protected $fillable = ['restaurant_id', 'nom', 'type', 'solde_actuel', 'statut'];
 
     protected $casts = [
         'solde_actuel' => 'decimal:2',
     ];
 
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function sessions(): HasMany
     {
         return $this->hasMany(SessionCaisse::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function commandes(): HasMany
@@ -33,9 +43,12 @@ class Caisse extends Model
         return $this->sessions()->where('statut', 'ouverte')->latest()->first();
     }
 
-    public static function sessionOuverte(): bool
+    public static function sessionOuverte(?int $restaurantId = null): bool
     {
+        $restaurantId ??= auth()->user()?->restaurant_id;
+
         return static::where('statut', 'active')
+            ->when($restaurantId, fn($q) => $q->where('restaurant_id', $restaurantId))
             ->whereHas('sessions', fn($q) => $q->where('statut', 'ouverte'))
             ->exists();
     }
@@ -58,6 +71,7 @@ class Caisse extends Model
         $soldeApres = $soldeAvant - $montant;
 
         $mouvement = $this->mouvements()->create([
+            'restaurant_id'     => $this->restaurant_id,
             'session_caisse_id' => $this->sessionActive()?->id,
             'stock_movement_id' => $stockMovementId,
             'depense_id'        => $depenseId,
@@ -82,6 +96,7 @@ class Caisse extends Model
         $soldeApres = $soldeAvant + $montant;
 
         $mouvement = $this->mouvements()->create([
+            'restaurant_id'     => $this->restaurant_id,
             'session_caisse_id' => $this->sessionActive()?->id,
             'commande_id'       => $commande->id,
             'user_id'           => auth()->id(),

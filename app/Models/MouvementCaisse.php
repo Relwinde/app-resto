@@ -10,7 +10,7 @@ class MouvementCaisse extends Model
     protected $table = 'mouvements_caisse';
 
     protected $fillable = [
-        'caisse_id', 'session_caisse_id', 'commande_id', 'stock_movement_id', 'depense_id', 'user_id',
+        'restaurant_id', 'caisse_id', 'session_caisse_id', 'commande_id', 'stock_movement_id', 'depense_id', 'user_id',
         'type', 'montant', 'solde_avant', 'solde_apres',
         'mode_paiement', 'montant_recu', 'monnaie_rendue', 'reference_mobile', 'note',
     ];
@@ -23,9 +23,19 @@ class MouvementCaisse extends Model
         'monnaie_rendue' => 'decimal:2',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function caisse(): BelongsTo
     {
         return $this->belongsTo(Caisse::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function sessionCaisse(): BelongsTo

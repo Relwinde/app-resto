@@ -12,7 +12,13 @@ class Produits extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void
     {
@@ -27,7 +33,7 @@ class Produits extends Component
     public function delete(int $id): void
     {
         Gate::authorize('Supprimer Produit');
-        $produit = Product::find($id);
+        $produit = Product::forRestaurant($this->restaurantId)->find($id);
         if ($produit) {
             $produit->delete();
             $this->dispatch('produit-deleted');
@@ -42,6 +48,7 @@ class Produits extends Component
         Gate::authorize('Voir Produits');
 
         $produits = Product::with('category')
+            ->forRestaurant($this->restaurantId)
             ->where('name', 'like', "%{$this->search}%")
             ->orderBy('name')
             ->paginate(10);
@@ -50,14 +57,15 @@ class Produits extends Component
             'title'       => 'Produits',
             'subtitle'    => 'Liste des produits',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Produits'],
             ],
         ];
 
         return view('livewire.produits.produits', [
-            'produits'   => $produits,
-            'pageHeader' => $pageHeader,
+            'produits'      => $produits,
+            'pageHeader'    => $pageHeader,
+            'restaurantId'  => $this->restaurantId,
         ])->layout('components.layouts.app', ['title' => 'Produits']);
     }
 }

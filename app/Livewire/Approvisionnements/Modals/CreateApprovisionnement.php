@@ -26,7 +26,8 @@ class CreateApprovisionnement extends ModalComponent
 
     public function mount(): void
     {
-        if (! Caisse::sessionOuverte()) {
+        $restaurantId = auth()->user()->restaurant_id;
+        if (! Caisse::sessionOuverte($restaurantId)) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
         }
@@ -34,10 +35,11 @@ class CreateApprovisionnement extends ModalComponent
 
     public function render()
     {
+        $restaurantId = auth()->user()->restaurant_id;
         return view('livewire.approvisionnements.modals.create-approvisionnement', [
-            'produits'     => Product::where('is_suppliable', true)->orderBy('name')->get(),
-            'fournisseurs' => Fournisseur::orderBy('name')->get(),
-            'caisses'      => Caisse::where('statut', 'active')->orderBy('nom')->get(),
+            'produits'     => Product::forRestaurant($restaurantId)->where('is_suppliable', true)->orderBy('name')->get(),
+            'fournisseurs' => Fournisseur::forRestaurant($restaurantId)->orderBy('name')->get(),
+            'caisses'      => Caisse::forRestaurant($restaurantId)->where('statut', 'active')->orderBy('nom')->get(),
         ]);
     }
 
@@ -50,7 +52,9 @@ class CreateApprovisionnement extends ModalComponent
     {
         Gate::authorize('Créer Approvisionnement');
 
-        if (! Caisse::sessionOuverte()) {
+        $restaurantId = auth()->user()->restaurant_id;
+
+        if (! Caisse::sessionOuverte($restaurantId)) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
             return;
@@ -79,12 +83,11 @@ class CreateApprovisionnement extends ModalComponent
             ]
         );
 
-        // Vérification du solde caisse avant toute création
         $caisse  = null;
         $montant = 0;
 
         if ($this->caisse_id) {
-            $caisse  = Caisse::findOrFail($this->caisse_id);
+            $caisse  = Caisse::forRestaurant($restaurantId)->findOrFail($this->caisse_id);
             $montant = round((float) $this->quantite * (float) $this->prix_achat, 2);
 
             if ($montant > 0 && $montant > (float) $caisse->solde_actuel) {
@@ -98,6 +101,7 @@ class CreateApprovisionnement extends ModalComponent
         }
 
         $mouvement = StockMovement::create([
+            'restaurant_id'   => $restaurantId,
             'product_id'      => $this->product_id,
             'fournisseur_id'  => $this->fournisseur_id ?: null,
             'caisse_id'       => $this->caisse_id ?: null,

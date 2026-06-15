@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class StockMovement extends Model
 {
     protected $fillable = [
+        'restaurant_id',
         'product_id',
         'fournisseur_id',
         'caisse_id',
@@ -25,9 +26,19 @@ class StockMovement extends Model
         'prix_achat'      => 'decimal:2',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function fournisseur(): BelongsTo

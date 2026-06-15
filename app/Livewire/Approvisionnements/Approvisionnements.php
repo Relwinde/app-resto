@@ -13,7 +13,13 @@ class Approvisionnements extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void
     {
@@ -28,7 +34,7 @@ class Approvisionnements extends Component
     public function delete(int $id): void
     {
         Gate::authorize('Supprimer Approvisionnement');
-        $appro = StockMovement::find($id);
+        $appro = StockMovement::forRestaurant($this->restaurantId)->find($id);
         if ($appro) {
             $appro->delete();
             $this->dispatch('approvisionnement-deleted');
@@ -43,6 +49,7 @@ class Approvisionnements extends Component
         Gate::authorize('Voir Approvisionnements');
 
         $approvisionnements = StockMovement::with(['product', 'fournisseur'])
+            ->forRestaurant($this->restaurantId)
             ->when($this->search, function ($query) {
                 $query->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
                       ->orWhereHas('fournisseur', fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
@@ -54,7 +61,7 @@ class Approvisionnements extends Component
             'title'       => 'Approvisionnements',
             'subtitle'    => 'Historique des entrées de stock',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Approvisionnements'],
             ],
         ];
@@ -62,7 +69,8 @@ class Approvisionnements extends Component
         return view('livewire.approvisionnements.approvisionnements', [
             'approvisionnements' => $approvisionnements,
             'pageHeader'         => $pageHeader,
-            'sessionOuverte'     => Caisse::sessionOuverte(),
+            'restaurantId'       => $this->restaurantId,
+            'sessionOuverte'     => Caisse::sessionOuverte($this->restaurantId),
         ])->layout('components.layouts.app', ['title' => 'Approvisionnements']);
     }
 }

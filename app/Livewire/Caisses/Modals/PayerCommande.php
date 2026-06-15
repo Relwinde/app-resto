@@ -39,7 +39,9 @@ class PayerCommande extends ModalComponent
     {
         Gate::authorize('Encaisser Commande');
 
-        if (! Caisse::sessionOuverte()) {
+        $restaurantId = auth()->user()->restaurant_id;
+
+        if (! Caisse::sessionOuverte($restaurantId)) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
             return;
@@ -60,7 +62,9 @@ class PayerCommande extends ModalComponent
             'montant_recu.min'      => 'Le montant reçu est insuffisant (minimum ' . number_format($this->total, 0, ',', ' ') . ' FCFA).',
         ]);
 
-        $caisse = $this->caisse_id ? Caisse::find($this->caisse_id) : Caisse::where('statut', 'active')->first();
+        $caisse = $this->caisse_id
+            ? Caisse::forRestaurant($restaurantId)->find($this->caisse_id)
+            : Caisse::forRestaurant($restaurantId)->where('statut', 'active')->first();
 
         if (! $caisse) {
             $this->addError('mode_paiement', 'Aucune caisse active trouvée.');
@@ -68,6 +72,7 @@ class PayerCommande extends ModalComponent
         }
 
         $commande = Commande::create([
+            'restaurant_id'     => $restaurantId,
             'numero'            => Commande::genererNumero(),
             'caisse_id'         => $caisse->id,
             'session_caisse_id' => $this->session_id,
@@ -80,6 +85,7 @@ class PayerCommande extends ModalComponent
 
         foreach ($this->panier as $item) {
             CommandeProduit::create([
+                'restaurant_id' => $restaurantId,
                 'commande_id'   => $commande->id,
                 'product_id'    => $item['product_id'],
                 'quantite'      => $item['quantite'],

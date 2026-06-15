@@ -11,7 +11,7 @@ class SessionCaisse extends Model
     protected $table = 'sessions_caisse';
 
     protected $fillable = [
-        'caisse_id', 'user_id', 'fond_ouverture', 'fond_fermeture',
+        'restaurant_id', 'caisse_id', 'user_id', 'fond_ouverture', 'fond_fermeture',
         'statut', 'ferme_le', 'note_ouverture', 'note_fermeture',
     ];
 
@@ -21,6 +21,11 @@ class SessionCaisse extends Model
         'ferme_le'       => 'datetime',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function caisse(): BelongsTo
     {
         return $this->belongsTo(Caisse::class);
@@ -29,6 +34,11 @@ class SessionCaisse extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function commandes(): HasMany
@@ -63,13 +73,14 @@ class SessionCaisse extends Model
         ]);
 
         $this->mouvements()->create([
-            'caisse_id'    => $this->caisse_id,
-            'user_id'      => auth()->id(),
-            'type'         => 'fermeture',
-            'montant'      => $fond_fermeture,
-            'solde_avant'  => $soldeAvant,
-            'solde_apres'  => $soldeAvant,
-            'note'         => $note,
+            'restaurant_id' => $this->restaurant_id,
+            'caisse_id'     => $this->caisse_id,
+            'user_id'       => auth()->id(),
+            'type'          => 'fermeture',
+            'montant'       => $fond_fermeture,
+            'solde_avant'   => $soldeAvant,
+            'solde_apres'   => $soldeAvant,
+            'note'          => $note,
         ]);
     }
 }

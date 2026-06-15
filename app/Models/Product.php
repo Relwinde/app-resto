@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Product extends Model
 {
     protected $fillable = [
+        'restaurant_id',
         'name',
         'category_id',
         'prix_vente',
@@ -24,9 +25,19 @@ class Product extends Model
         'prix_achat'    => 'decimal:2',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function stockMovements(): HasMany

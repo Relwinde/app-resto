@@ -18,8 +18,9 @@ class CreateProduit extends ModalComponent
 
     public function render()
     {
+        $restaurantId = auth()->user()->restaurant_id;
         return view('livewire.produits.modals.create-produit', [
-            'categories' => Category::orderBy('name')->get(),
+            'categories' => Category::forRestaurant($restaurantId)->orderBy('name')->get(),
         ]);
     }
 
@@ -27,25 +28,27 @@ class CreateProduit extends ModalComponent
     {
         Gate::authorize('Créer Produit');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate(
             [
-                'name'         => ['required', 'string', 'max:255', 'unique:products,name'],
-                'category_id'  => ['nullable', 'exists:categories,id'],
-                'prix_vente'   => ['required', 'numeric', 'min:0'],
-                'prix_achat'   => ['nullable', 'numeric', 'min:0'],
-                'unite'        => ['required', 'string', 'max:50'],
+                'name'          => ['required', 'string', 'max:255'],
+                'category_id'   => ['nullable', 'exists:categories,id'],
+                'prix_vente'    => ['required', 'numeric', 'min:0'],
+                'prix_achat'    => ['nullable', 'numeric', 'min:0'],
+                'unite'         => ['required', 'string', 'max:50'],
                 'is_suppliable' => ['boolean'],
             ],
             [
-                'name.required'      => 'Le nom du produit est obligatoire.',
-                'name.unique'        => 'Ce produit existe déjà.',
+                'name.required'       => 'Le nom du produit est obligatoire.',
                 'prix_vente.required' => 'Le prix de vente est obligatoire.',
-                'prix_vente.numeric' => 'Le prix de vente doit être un nombre.',
-                'unite.required'     => "L'unité de mesure est obligatoire.",
+                'prix_vente.numeric'  => 'Le prix de vente doit être un nombre.',
+                'unite.required'      => "L'unité de mesure est obligatoire.",
             ]
         );
 
         Product::create([
+            'restaurant_id' => $restaurantId,
             'name'          => $this->name,
             'category_id'   => $this->category_id ?: null,
             'prix_vente'    => $this->prix_vente,

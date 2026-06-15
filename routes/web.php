@@ -18,33 +18,58 @@ use App\Livewire\Commandes\Commandes;
 use App\Livewire\Utilisateurs\Utilisateurs;
 use App\Livewire\Roles\Roles;
 
-Route::get('/', fn() => redirect()->route('dashboard'));
-Route::get('/dashboard', Dashboard::class)->name('dashboard')->middleware('auth');
-Route::get('/produits', Produits::class)->name('produits')->middleware('auth');
-Route::get('/categories', Categories::class)->name('categories')->middleware('auth');
-Route::get('/approvisionnements', Approvisionnements::class)->name('approvisionnements')->middleware('auth');
-Route::get('/fournisseurs', Fournisseurs::class)->name('fournisseurs')->middleware('auth');
-Route::get('/caisse', Caisses::class)->name('caisse')->middleware('auth');
-Route::get('/caisse/sessions', Sessions::class)->name('caisse.sessions')->middleware('auth');
-Route::get('/caisse/mouvements', Mouvements::class)->name('caisse.mouvements')->middleware('auth');
-Route::get('/caisse/depenses', Depenses::class)->name('caisse.depenses')->middleware('auth');
-Route::get('/commandes', Commandes::class)->name('commandes')->middleware('auth');
-Route::get('/commandes/{commande}/recu', function (App\Models\Commande $commande) {
-    Gate::authorize('Voir Détail Commande');
-    $commande->loadMissing(['items.produit', 'caisse', 'user', 'mouvement']);
-    return view('commandes.recu', compact('commande'));
-})->name('commandes.recu')->middleware('auth');
-Route::get('/utilisateurs', Utilisateurs::class)->name('utilisateurs')->middleware('auth');
-Route::get('/roles', Roles::class)->name('roles')->middleware('auth');
-Route::get('/files/{file}', function (File $file) {
-    abort_unless(Storage::disk('local')->exists($file->path), 404);
-    return Storage::disk('local')->download($file->path, $file->original_name);
-})->name('files.download')->middleware('auth');
+Route::get('/', function () {
+    if (auth()->check()) {
+        $user = auth()->user();
+        if ($user->isGlobalAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        if ($user->restaurant_id) {
+            return redirect()->route('app.dashboard', ['restaurantId' => $user->restaurant_id]);
+        }
+    }
+    return redirect()->route('login');
+});
 
 Route::get('/login', Login::class)->name('login');
-Route::get('/logout', function () {
+Route::get('/register', \App\Livewire\Auth\Register::class)->name('register');
+Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
     return redirect('/login');
 })->name('logout')->middleware('auth');
+
+Route::prefix('app/{restaurantId}')->middleware(['auth', 'restaurant-scoped'])->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('app.dashboard');
+    Route::get('/produits', Produits::class)->name('app.produits');
+    Route::get('/categories', Categories::class)->name('app.categories');
+    Route::get('/approvisionnements', Approvisionnements::class)->name('app.approvisionnements');
+    Route::get('/fournisseurs', Fournisseurs::class)->name('app.fournisseurs');
+    Route::get('/caisse', Caisses::class)->name('app.caisse');
+    Route::get('/caisse/sessions', Sessions::class)->name('app.caisse.sessions');
+    Route::get('/caisse/mouvements', Mouvements::class)->name('app.caisse.mouvements');
+    Route::get('/caisse/depenses', Depenses::class)->name('app.caisse.depenses');
+    Route::get('/commandes', Commandes::class)->name('app.commandes');
+    Route::get('/commandes/{commande}/recu', function (App\Models\Commande $commande) {
+        Gate::authorize('Voir Détail Commande');
+        $commande->loadMissing(['items.produit', 'caisse', 'user', 'mouvement']);
+        return view('commandes.recu', compact('commande'));
+    })->name('app.commandes.recu');
+    Route::get('/utilisateurs', Utilisateurs::class)->name('app.utilisateurs');
+    Route::get('/roles', Roles::class)->name('app.roles');
+});
+
+Route::prefix('admin')->middleware(['auth', 'global-admin-only'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    Route::get('/restaurants', function () {
+        return view('admin.restaurants.index');
+    })->name('admin.restaurants.index');
+});
+
+Route::get('/files/{file}', function (File $file) {
+    abort_unless(Storage::disk('local')->exists($file->path), 404);
+    return Storage::disk('local')->download($file->path, $file->original_name);
+})->name('files.download')->middleware('auth');

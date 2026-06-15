@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('restaurant_id')->nullable()->constrained('restaurants')->nullOnDelete();
+            $table->boolean('is_global_admin')->default(false);
+            $table->index('restaurant_id');
+            $table->index('is_global_admin');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['restaurant_id']);
+            $table->dropColumn(['restaurant_id', 'is_global_admin']);
+        });
+    }
+};

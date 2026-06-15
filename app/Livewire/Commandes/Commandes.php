@@ -12,10 +12,16 @@ class Commandes extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search  = '';
     public string $statut  = '';
     public string $dateMin = '';
     public string $dateMax = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingStatut(): void { $this->resetPage(); }
@@ -34,6 +40,7 @@ class Commandes extends Component
         Gate::authorize('Voir Commandes');
 
         $commandes = Commande::with(['caisse', 'user', 'items'])
+            ->forRestaurant($this->restaurantId)
             ->when($this->search, function ($q) {
                 $q->where(function ($q2) {
                     $q2->where('numero', 'like', "%{$this->search}%")
@@ -51,7 +58,7 @@ class Commandes extends Component
             'title'       => 'Commandes',
             'subtitle'    => 'Historique des commandes',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Commandes'],
             ],
         ];

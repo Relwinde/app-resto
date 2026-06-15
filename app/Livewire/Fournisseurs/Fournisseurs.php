@@ -12,7 +12,13 @@ class Fournisseurs extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void
     {
@@ -27,7 +33,7 @@ class Fournisseurs extends Component
     public function delete(int $id): void
     {
         Gate::authorize('Supprimer Fournisseur');
-        $fournisseur = Fournisseur::find($id);
+        $fournisseur = Fournisseur::forRestaurant($this->restaurantId)->find($id);
         if ($fournisseur) {
             $fournisseur->delete();
             $this->dispatch('fournisseur-deleted');
@@ -42,6 +48,7 @@ class Fournisseurs extends Component
         Gate::authorize('Voir Fournisseurs');
 
         $fournisseurs = Fournisseur::withCount('stockMovements')
+            ->forRestaurant($this->restaurantId)
             ->where(function ($query) {
                 $query->where('name', 'like', "%{$this->search}%")
                       ->orWhere('phone', 'like', "%{$this->search}%");
@@ -53,14 +60,15 @@ class Fournisseurs extends Component
             'title'       => 'Fournisseurs',
             'subtitle'    => 'Liste des fournisseurs',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Fournisseurs'],
             ],
         ];
 
         return view('livewire.fournisseurs.fournisseurs', [
-            'fournisseurs' => $fournisseurs,
-            'pageHeader'   => $pageHeader,
+            'fournisseurs'  => $fournisseurs,
+            'pageHeader'    => $pageHeader,
+            'restaurantId'  => $this->restaurantId,
         ])->layout('components.layouts.app', ['title' => 'Fournisseurs']);
     }
 }

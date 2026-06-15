@@ -19,7 +19,8 @@ class EncaisserCommande extends ModalComponent
 
     public function mount(): void
     {
-        if (! Caisse::sessionOuverte()) {
+        $restaurantId = auth()->user()->restaurant_id;
+        if (! Caisse::sessionOuverte($restaurantId)) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
             return;
@@ -38,7 +39,9 @@ class EncaisserCommande extends ModalComponent
     {
         Gate::authorize('Encaisser Commande');
 
-        if (! Caisse::sessionOuverte()) {
+        $restaurantId = auth()->user()->restaurant_id;
+
+        if (! Caisse::sessionOuverte($restaurantId)) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
             return;
@@ -59,7 +62,7 @@ class EncaisserCommande extends ModalComponent
             'montant_recu.min'      => 'Le montant reçu est insuffisant (minimum ' . number_format((float) $this->commande->montant_total, 0, ',', ' ') . ' FCFA).',
         ]);
 
-        $caisse = Caisse::where('type', $this->mode_paiement)->where('statut', 'active')->first();
+        $caisse = Caisse::forRestaurant($restaurantId)->where('type', $this->mode_paiement)->where('statut', 'active')->first();
 
         if (! $caisse) {
             $this->addError('mode_paiement', 'Aucune caisse active trouvée.');

@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'restaurant_id',
+        'is_global_admin',
     ];
 
     /**
@@ -41,5 +43,36 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_global_admin' => 'boolean',
     ];
+
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
+    }
+
+    public function scopeGlobalAdmins($query)
+    {
+        return $query->where('is_global_admin', true);
+    }
+
+    public function isGlobalAdmin(): bool
+    {
+        return $this->is_global_admin === true;
+    }
+
+    public function isRestaurantUser(): bool
+    {
+        return $this->restaurant_id !== null && !$this->is_global_admin;
+    }
+
+    public function canAccessRestaurant($restaurantId): bool
+    {
+        return $this->is_global_admin || $this->restaurant_id == $restaurantId;
+    }
 }

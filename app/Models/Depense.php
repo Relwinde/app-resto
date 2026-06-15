@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Depense extends Model
 {
     protected $fillable = [
-        'caisse_id', 'session_caisse_id', 'user_id', 'valide_par', 'paye_par',
+        'restaurant_id', 'caisse_id', 'session_caisse_id', 'user_id', 'valide_par', 'paye_par',
         'montant', 'motif', 'beneficiaire', 'note', 'statut', 'valide_le', 'paye_le',
     ];
 
@@ -20,6 +20,11 @@ class Depense extends Model
         'paye_le'    => 'datetime',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function caisse(): BelongsTo
     {
         return $this->belongsTo(Caisse::class);
@@ -28,6 +33,11 @@ class Depense extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function validePar(): BelongsTo

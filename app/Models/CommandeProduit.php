@@ -10,7 +10,7 @@ class CommandeProduit extends Model
     protected $table = 'commande_produits';
 
     protected $fillable = [
-        'commande_id', 'product_id', 'quantite', 'prix_unitaire', 'sous_total', 'note',
+        'restaurant_id', 'commande_id', 'product_id', 'quantite', 'prix_unitaire', 'sous_total', 'note',
     ];
 
     protected $casts = [
@@ -27,5 +27,10 @@ class CommandeProduit extends Model
     public function produit(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 }

@@ -32,8 +32,9 @@ class EditProduit extends ModalComponent
 
     public function render()
     {
+        $restaurantId = auth()->user()->restaurant_id;
         return view('livewire.produits.modals.edit-produit', [
-            'categories' => Category::orderBy('name')->get(),
+            'categories' => Category::forRestaurant($restaurantId)->orderBy('name')->get(),
         ]);
     }
 
@@ -43,11 +44,11 @@ class EditProduit extends ModalComponent
 
         $this->validate(
             [
-                'name'         => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($this->produit->id)],
-                'category_id'  => ['nullable', 'exists:categories,id'],
-                'prix_vente'   => ['required', 'numeric', 'min:0'],
-                'prix_achat'   => ['nullable', 'numeric', 'min:0'],
-                'unite'        => ['required', 'string', 'max:50'],
+                'name'          => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($this->produit->id)],
+                'category_id'   => ['nullable', 'exists:categories,id'],
+                'prix_vente'    => ['required', 'numeric', 'min:0'],
+                'prix_achat'    => ['nullable', 'numeric', 'min:0'],
+                'unite'         => ['required', 'string', 'max:50'],
                 'is_suppliable' => ['boolean'],
             ],
             [

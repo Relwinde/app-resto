@@ -34,9 +34,10 @@ class EditApprovisionnement extends ModalComponent
 
     public function render()
     {
+        $restaurantId = auth()->user()->restaurant_id;
         return view('livewire.approvisionnements.modals.edit-approvisionnement', [
-            'produits'     => Product::where('is_suppliable', true)->orderBy('name')->get(),
-            'fournisseurs' => Fournisseur::orderBy('name')->get(),
+            'produits'     => Product::forRestaurant($restaurantId)->where('is_suppliable', true)->orderBy('name')->get(),
+            'fournisseurs' => Fournisseur::forRestaurant($restaurantId)->orderBy('name')->get(),
         ]);
     }
 

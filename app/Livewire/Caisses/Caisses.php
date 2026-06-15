@@ -13,12 +13,18 @@ use Livewire\Component;
 
 class Caisses extends Component
 {
+    public $restaurantId;
     public string $vue         = 'commandes';
     public array  $panier      = [];
     public int    $categorieId = 0;
     public string $search      = '';
     public string $table_numero = '';
     public string $client_nom   = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     #[On('session-ouverte')]
     #[On('depense-payee')]
@@ -28,31 +34,33 @@ class Caisses extends Component
     {
         Gate::authorize('Voir Caisse');
 
-        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
-        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+        $caisseEspeces = Caisse::forRestaurant($this->restaurantId)->where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile  = Caisse::forRestaurant($this->restaurantId)->where('type', 'mobile_money')->where('statut', 'active')->first();
         $sessionActive = $caisseEspeces?->sessionActive();
 
         $commandes = Commande::with(['items.produit', 'user'])
+            ->forRestaurant($this->restaurantId)
             ->whereIn('statut', ['en_attente', 'en_preparation', 'servie', 'payee'])
             ->when($sessionActive, fn ($q) => $q->where('session_caisse_id', $sessionActive->id))
             ->orderBy('created_at', 'desc')
             ->get();
 
         $produits = Product::with('category')
+            ->forRestaurant($this->restaurantId)
             ->when($this->categorieId, fn ($q) => $q->where('category_id', $this->categorieId))
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->whereNotNull('prix_vente')
             ->orderBy('name')
             ->get();
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::forRestaurant($this->restaurantId)->orderBy('name')->get();
         $total      = collect($this->panier)->sum('sous_total');
 
         $pageHeader = [
             'title'       => 'Caisse',
             'subtitle'    => $caisseEspeces?->nom ?? 'Caisse',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Caisse'],
             ],
         ];
@@ -66,7 +74,7 @@ class Caisses extends Component
 
     public function ajouterProduit(int $id): void
     {
-        $produit = Product::find($id);
+        $produit = Product::forRestaurant($this->restaurantId)->find($id);
         if (! $produit) {
             return;
         }
@@ -128,11 +136,12 @@ class Caisses extends Component
             return;
         }
 
-        $caisse        = Caisse::where('type', 'especes')->where('statut', 'active')->first();
+        $caisse        = Caisse::forRestaurant($this->restaurantId)->where('type', 'especes')->where('statut', 'active')->first();
         $sessionActive = $caisse?->sessionActive();
         $total         = collect($this->panier)->sum('sous_total');
 
         $commande = Commande::create([
+            'restaurant_id'     => $this->restaurantId,
             'numero'            => Commande::genererNumero(),
             'caisse_id'         => $caisse?->id,
             'session_caisse_id' => $sessionActive?->id,
@@ -145,6 +154,7 @@ class Caisses extends Component
 
         foreach ($this->panier as $item) {
             CommandeProduit::create([
+                'restaurant_id' => $this->restaurantId,
                 'commande_id'   => $commande->id,
                 'product_id'    => $item['product_id'],
                 'quantite'      => $item['quantite'],
@@ -169,7 +179,7 @@ class Caisses extends Component
             'en_preparation' => 'servie',
         ];
 
-        $commande = Commande::findOrFail($commandeId);
+        $commande = Commande::forRestaurant($this->restaurantId)->findOrFail($commandeId);
 
         if (! isset($transitions[$commande->statut]) || $transitions[$commande->statut] !== $statut) {
             return;

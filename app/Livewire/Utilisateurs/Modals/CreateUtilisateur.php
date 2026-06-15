@@ -26,6 +26,8 @@ class CreateUtilisateur extends ModalComponent
     {
         Gate::authorize('Créer Utilisateur');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate(
             [
                 'name'     => ['required', 'string', 'max:255'],
@@ -35,7 +37,7 @@ class CreateUtilisateur extends ModalComponent
             ],
             [
                 'name.required'     => 'Le nom est obligatoire.',
-                'email.required'    => 'L\'email est obligatoire.',
+                'email.required'    => "L'email est obligatoire.",
                 'email.unique'      => 'Cet email est déjà utilisé.',
                 'password.required' => 'Le mot de passe est obligatoire.',
                 'password.min'      => 'Le mot de passe doit comporter au moins 8 caractères.',
@@ -44,9 +46,10 @@ class CreateUtilisateur extends ModalComponent
         );
 
         $user = User::create([
-            'name'     => $this->name,
-            'email'    => $this->email,
-            'password' => Hash::make($this->password),
+            'restaurant_id' => $restaurantId,
+            'name'          => $this->name,
+            'email'         => $this->email,
+            'password'      => Hash::make($this->password),
         ]);
 
         $user->assignRole($this->role);

@@ -12,8 +12,14 @@ class Depenses extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
     public string $statut = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void { $this->resetPage(); }
     public function updatingStatut(): void { $this->resetPage(); }
@@ -22,7 +28,7 @@ class Depenses extends Component
     {
         Gate::authorize('Soumettre Dépense');
 
-        $depense = Depense::findOrFail($id);
+        $depense = Depense::forRestaurant($this->restaurantId)->findOrFail($id);
 
         if (! $depense->estEdite()) {
             $this->dispatch('notify', message: 'Ce bon ne peut pas être soumis dans son état actuel.', type: 'error');
@@ -38,7 +44,7 @@ class Depenses extends Component
     {
         Gate::authorize('Valider Dépense');
 
-        $depense = Depense::findOrFail($id);
+        $depense = Depense::forRestaurant($this->restaurantId)->findOrFail($id);
 
         if (! $depense->estEnAttente()) {
             $this->dispatch('notify', message: 'Ce bon ne peut pas être validé dans son état actuel.', type: 'error');
@@ -59,7 +65,7 @@ class Depenses extends Component
     {
         Gate::authorize('Supprimer Dépense');
 
-        $depense = Depense::findOrFail($id);
+        $depense = Depense::forRestaurant($this->restaurantId)->findOrFail($id);
 
         if (! $depense->estEdite()) {
             $this->dispatch('notify', message: 'Seuls les bons en état « Édité » peuvent être supprimés.', type: 'error');
@@ -82,6 +88,7 @@ class Depenses extends Component
         Gate::authorize('Voir Dépenses');
 
         $depenses = Depense::with(['caisse', 'user', 'validePar', 'payePar', 'files'])
+            ->forRestaurant($this->restaurantId)
             ->when($this->search, fn ($q) => $q->where('motif', 'like', "%{$this->search}%")
                 ->orWhere('beneficiaire', 'like', "%{$this->search}%"))
             ->when($this->statut, fn ($q) => $q->where('statut', $this->statut))
@@ -92,8 +99,8 @@ class Depenses extends Component
             'title'       => 'Dépenses',
             'subtitle'    => 'Bons de caisse',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
-                ['label' => 'Caisse', 'url' => route('caisse')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
+                ['label' => 'Caisse', 'url' => route('app.caisse', $this->restaurantId)],
                 ['label' => 'Dépenses'],
             ],
         ];

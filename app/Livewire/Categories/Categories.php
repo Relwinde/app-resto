@@ -12,7 +12,13 @@ class Categories extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void
     {
@@ -27,7 +33,7 @@ class Categories extends Component
     public function delete(int $id): void
     {
         Gate::authorize('Supprimer Catégorie');
-        $categorie = Category::find($id);
+        $categorie = Category::forRestaurant($this->restaurantId)->find($id);
         if ($categorie) {
             $categorie->delete();
             $this->dispatch('categorie-deleted');
@@ -42,6 +48,7 @@ class Categories extends Component
         Gate::authorize('Voir Catégories');
 
         $categories = Category::withCount('products')
+            ->forRestaurant($this->restaurantId)
             ->where('name', 'like', "%{$this->search}%")
             ->orderBy('name')
             ->paginate(10);
@@ -50,14 +57,15 @@ class Categories extends Component
             'title'       => 'Catégories',
             'subtitle'    => 'Liste des catégories',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Catégories'],
             ],
         ];
 
         return view('livewire.categories.categories', [
-            'categories' => $categories,
-            'pageHeader' => $pageHeader,
+            'categories'    => $categories,
+            'pageHeader'    => $pageHeader,
+            'restaurantId'  => $this->restaurantId,
         ])->layout('components.layouts.app', ['title' => 'Catégories']);
     }
 }

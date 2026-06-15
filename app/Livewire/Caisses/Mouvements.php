@@ -12,10 +12,16 @@ class Mouvements extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $caisse_id = '';
     public string $type      = '';
     public string $dateMin   = '';
     public string $dateMax   = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingCaisseId(): void { $this->resetPage(); }
     public function updatingType(): void { $this->resetPage(); }
@@ -34,10 +40,11 @@ class Mouvements extends Component
         Gate::authorize('Voir Journal Caisse');
 
         $caisse = $this->caisse_id
-            ? Caisse::find($this->caisse_id)
-            : Caisse::where('statut', 'active')->first();
+            ? Caisse::forRestaurant($this->restaurantId)->find($this->caisse_id)
+            : Caisse::forRestaurant($this->restaurantId)->where('statut', 'active')->first();
 
         $mouvements = MouvementCaisse::with(['caisse', 'commande', 'user'])
+            ->forRestaurant($this->restaurantId)
             ->when($this->caisse_id, fn ($q) => $q->where('caisse_id', $this->caisse_id))
             ->when($this->type, fn ($q) => $q->where('type', $this->type))
             ->when($this->dateMin, fn ($q) => $q->whereDate('created_at', '>=', $this->dateMin))
@@ -45,16 +52,16 @@ class Mouvements extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        $caisses       = Caisse::orderBy('nom')->get();
-        $caisseEspeces = Caisse::where('type', 'especes')->where('statut', 'active')->first();
-        $caisseMobile  = Caisse::where('type', 'mobile_money')->where('statut', 'active')->first();
+        $caisses       = Caisse::forRestaurant($this->restaurantId)->orderBy('nom')->get();
+        $caisseEspeces = Caisse::forRestaurant($this->restaurantId)->where('type', 'especes')->where('statut', 'active')->first();
+        $caisseMobile  = Caisse::forRestaurant($this->restaurantId)->where('type', 'mobile_money')->where('statut', 'active')->first();
 
         $pageHeader = [
             'title'       => 'Journal de caisse',
             'subtitle'    => 'Mouvements de caisse',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
-                ['label' => 'Caisse', 'url' => route('caisse')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
+                ['label' => 'Caisse', 'url' => route('app.caisse', $this->restaurantId)],
                 ['label' => 'Journal'],
             ],
         ];

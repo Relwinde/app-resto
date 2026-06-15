@@ -26,6 +26,8 @@ class CreateDepense extends ModalComponent
     {
         Gate::authorize('Créer Dépense');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate([
             'motif'        => ['required', 'string', 'max:255'],
             'montant'      => ['required', 'numeric', 'min:1'],
@@ -41,12 +43,13 @@ class CreateDepense extends ModalComponent
         ]);
 
         $depense = Depense::create([
-            'user_id'      => auth()->id(),
-            'montant'      => $this->montant,
-            'motif'        => $this->motif,
-            'beneficiaire' => $this->beneficiaire ?: null,
-            'note'         => $this->note ?: null,
-            'statut'       => 'edite',
+            'restaurant_id' => $restaurantId,
+            'user_id'       => auth()->id(),
+            'montant'       => $this->montant,
+            'motif'         => $this->motif,
+            'beneficiaire'  => $this->beneficiaire ?: null,
+            'note'          => $this->note ?: null,
+            'statut'        => 'edite',
         ]);
 
         if ($this->fichier) {

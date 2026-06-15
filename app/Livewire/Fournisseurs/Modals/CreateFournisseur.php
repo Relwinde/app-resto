@@ -20,20 +20,22 @@ class CreateFournisseur extends ModalComponent
     {
         Gate::authorize('Créer Fournisseur');
 
+        $restaurantId = auth()->user()->restaurant_id;
+
         $this->validate(
             [
-                'name'  => ['required', 'string', 'max:255', 'unique:fournisseurs,name'],
+                'name'  => ['required', 'string', 'max:255'],
                 'phone' => ['nullable', 'string', 'max:50'],
             ],
             [
                 'name.required' => 'Le nom du fournisseur est obligatoire.',
-                'name.unique'   => 'Ce fournisseur existe déjà.',
             ]
         );
 
         Fournisseur::create([
-            'name'  => $this->name,
-            'phone' => $this->phone ?: null,
+            'restaurant_id' => $restaurantId,
+            'name'          => $this->name,
+            'phone'         => $this->phone ?: null,
         ]);
 
         $this->dispatch('fournisseur-created');

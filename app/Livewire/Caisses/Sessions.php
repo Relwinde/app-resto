@@ -13,6 +13,13 @@ class Sessions extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
+
     #[On('session-ouverte')]
     #[On('session-fermee')]
     public function render()
@@ -20,18 +27,19 @@ class Sessions extends Component
         Gate::authorize('Voir Sessions Caisse');
 
         $sessions = SessionCaisse::with(['caisse', 'user'])
+            ->forRestaurant($this->restaurantId)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        $caisse         = Caisse::where('statut', 'active')->first();
-        $sessionActive  = $caisse?->sessionActive();
+        $caisse        = Caisse::forRestaurant($this->restaurantId)->where('statut', 'active')->first();
+        $sessionActive = $caisse?->sessionActive();
 
         $pageHeader = [
             'title'       => 'Sessions de Caisse',
             'subtitle'    => 'Ouverture et fermeture des sessions',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
-                ['label' => 'Caisse', 'url' => route('caisse')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
+                ['label' => 'Caisse', 'url' => route('app.caisse', $this->restaurantId)],
                 ['label' => 'Sessions'],
             ],
         ];

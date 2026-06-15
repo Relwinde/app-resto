@@ -12,7 +12,13 @@ class Utilisateurs extends Component
 {
     use WithPagination;
 
+    public $restaurantId;
     public string $search = '';
+
+    public function mount($restaurantId): void
+    {
+        $this->restaurantId = $restaurantId;
+    }
 
     public function updatingSearch(): void { $this->resetPage(); }
 
@@ -30,7 +36,7 @@ class Utilisateurs extends Component
             return;
         }
 
-        User::find($id)?->delete();
+        User::forRestaurant($this->restaurantId)->find($id)?->delete();
         $this->dispatch('utilisateur-deleted');
     }
 
@@ -42,6 +48,7 @@ class Utilisateurs extends Component
         Gate::authorize('Voir Utilisateurs');
 
         $utilisateurs = User::with('roles')
+            ->forRestaurant($this->restaurantId)
             ->where(function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")
                   ->orWhere('email', 'like', "%{$this->search}%");
@@ -53,7 +60,7 @@ class Utilisateurs extends Component
             'title'       => 'Utilisateurs',
             'subtitle'    => 'Gestion des utilisateurs',
             'breadcrumbs' => [
-                ['label' => 'Accueil', 'url' => route('dashboard')],
+                ['label' => 'Accueil', 'url' => route('app.dashboard', $this->restaurantId)],
                 ['label' => 'Utilisateurs'],
             ],
         ];

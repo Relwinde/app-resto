@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Commande extends Model
 {
     protected $fillable = [
-        'numero', 'caisse_id', 'session_caisse_id', 'user_id',
+        'restaurant_id', 'numero', 'caisse_id', 'session_caisse_id', 'user_id',
         'table_numero', 'client_nom', 'statut', 'note', 'montant_total',
     ];
 
@@ -18,9 +18,19 @@ class Commande extends Model
         'montant_total' => 'decimal:2',
     ];
 
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(CommandeProduit::class);
+    }
+
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('restaurant_id', $restaurantId);
     }
 
     public function mouvement(): HasOne
@@ -55,8 +65,11 @@ class Commande extends Model
 
     public static function genererNumero(): string
     {
-        $date     = now()->format('Ymd');
-        $derniere = static::whereDate('created_at', today())->count() + 1;
+        $restaurantId = auth()->user()?->restaurant_id;
+        $date         = now()->format('Ymd');
+        $derniere     = static::whereDate('created_at', today())
+            ->when($restaurantId, fn($q) => $q->where('restaurant_id', $restaurantId))
+            ->count() + 1;
         return sprintf('CMD-%s-%04d', $date, $derniere);
     }
 }
