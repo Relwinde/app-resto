@@ -25,7 +25,7 @@ class PermissionSeeder extends Seeder
             // Caisse
             'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse',
             'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse',
-            'Voir Activité Caisse', 'Changer Statut Commande',
+            'Voir Activité Caisse', 'Changer Statut Commande', 'Enregistrer Dépôt',
             // Commandes
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             // Journal
@@ -53,7 +53,7 @@ class PermissionSeeder extends Seeder
             'Voir Catégories',
             'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse',
             'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse',
-            'Voir Activité Caisse', 'Changer Statut Commande',
+            'Voir Activité Caisse', 'Changer Statut Commande', 'Enregistrer Dépôt',
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             'Voir Journal Caisse',
             'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense', 'Payer Dépense',

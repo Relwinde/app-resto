@@ -59,30 +59,39 @@
 
                         {{-- Actions session --}}
                         <div class="col-md-3 text-right">
-                            @if ($sessionActive)
-                                @can('Fermer Session Caisse')
-                                <button type="button"
-                                    wire:click="$dispatch('openModal', { component: 'caisses.modals.fermer-session' })"
-                                    class="btn btn-sm btn-alt-danger">
-                                    <i class="fa fa-fw fa-lock"></i> Fermer session
-                                </button>
-                                @endcan
-                                <div class="mt-2 small text-muted">
-                                    <span class="badge badge-success">Session ouverte</span>
-                                    <span class="ml-1">depuis {{ $sessionActive->created_at->format('H:i') }} ({{ $sessionActive->user->name }})</span>
-                                </div>
-                            @else
-                                @can('Ouvrir Session Caisse')
-                                <button type="button"
-                                    wire:click="$dispatch('openModal', { component: 'caisses.modals.ouvrir-session' })"
-                                    class="btn btn-sm btn-alt-success">
-                                    <i class="fa fa-fw fa-unlock"></i> Ouvrir session
-                                </button>
-                                @endcan
-                                <div class="mt-2 small text-muted">
-                                    <span class="badge badge-secondary">Aucune session</span>
-                                </div>
-                            @endif
+                            <div class="d-flex flex-column gap-2">
+                                @if ($sessionActive)
+                                    @can('Enregistrer Dépôt')
+                                    <button type="button"
+                                        wire:click="$dispatch('openModal', { component: 'caisses.modals.creer-depot' })"
+                                        class="btn btn-sm btn-info">
+                                        <i class="fa fa-fw fa-plus"></i> Ajouter dépôt
+                                    </button>
+                                    @endcan
+                                    @can('Fermer Session Caisse')
+                                    <button type="button"
+                                        wire:click="$dispatch('openModal', { component: 'caisses.modals.fermer-session' })"
+                                        class="btn btn-sm btn-alt-danger">
+                                        <i class="fa fa-fw fa-lock"></i> Fermer session
+                                    </button>
+                                    @endcan
+                                    <div class="mt-2 small text-muted">
+                                        <span class="badge badge-success">Session ouverte</span>
+                                        <span class="ml-1">depuis {{ $sessionActive->created_at->format('H:i') }} ({{ $sessionActive->user->name }})</span>
+                                    </div>
+                                @else
+                                    @can('Ouvrir Session Caisse')
+                                    <button type="button"
+                                        wire:click="$dispatch('openModal', { component: 'caisses.modals.ouvrir-session' })"
+                                        class="btn btn-sm btn-alt-success">
+                                        <i class="fa fa-fw fa-unlock"></i> Ouvrir session
+                                    </button>
+                                    @endcan
+                                    <div class="mt-2 small text-muted">
+                                        <span class="badge badge-secondary">Aucune session</span>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                     </div>
@@ -451,5 +460,8 @@
 
         </div>
     </div>
+
+    {{-- Modals --}}
+    <livewire:caisses.modals.creer-depot />
 
 </div>

@@ -24,6 +24,7 @@ class Caisses extends Component
     #[On('depense-payee')]
     #[On('commande-encaissee')]
     #[On('session-fermee')]
+    #[On('depot-enregistre')]
     public function render()
     {
         Gate::authorize('Voir Caisse');

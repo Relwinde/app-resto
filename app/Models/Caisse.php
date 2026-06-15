@@ -101,4 +101,25 @@ class Caisse extends Model
 
         return $mouvement;
     }
+
+    public function deposer(float $montant, ?string $note = null): MouvementCaisse
+    {
+        $soldeAvant = (float) $this->solde_actuel;
+        $soldeApres = $soldeAvant + $montant;
+
+        $mouvement = $this->mouvements()->create([
+            'session_caisse_id' => $this->sessionActive()?->id,
+            'user_id'           => auth()->id(),
+            'type'              => 'depot',
+            'montant'           => $montant,
+            'solde_avant'       => $soldeAvant,
+            'solde_apres'       => $soldeApres,
+            'mode_paiement'     => $this->type,
+            'note'              => $note,
+        ]);
+
+        $this->update(['solde_actuel' => $soldeApres]);
+
+        return $mouvement;
+    }
 }
