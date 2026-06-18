@@ -61,13 +61,6 @@
                         <div class="col-md-3 text-right">
                             <div class="d-flex flex-column gap-2">
                                 @if ($sessionActive)
-                                    @can('Enregistrer Dépôt')
-                                    <button type="button"
-                                        wire:click="$dispatch('openModal', { component: 'caisses.modals.creer-depot' })"
-                                        class="btn btn-sm btn-info">
-                                        <i class="fa fa-fw fa-plus"></i> Ajouter dépôt
-                                    </button>
-                                    @endcan
                                     @can('Fermer Session Caisse')
                                     <button type="button"
                                         wire:click="$dispatch('openModal', { component: 'caisses.modals.fermer-session' })"
@@ -92,8 +85,21 @@
                                     </div>
                                 @endif
                             </div>
-                        </div>
 
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="d-flex flex-column gap-2">
+                                @if ($sessionActive)
+                                    @can('Enregistrer Dépôt')
+                                        <button type="button"
+                                            wire:click="$dispatch('openModal', { component: 'caisses.modals.creer-depot' })"
+                                            class="btn btn-sm btn-info">
+                                            <i class="fa fa-fw fa-plus"></i> Ajouter dépôt
+                                        </button>
+                                    @endcan
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -462,6 +468,5 @@
     </div>
 
     {{-- Modals --}}
-    <livewire:caisses.modals.creer-depot />
 
 </div>
