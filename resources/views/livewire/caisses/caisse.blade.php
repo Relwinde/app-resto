@@ -77,7 +77,7 @@
                                     @endcan
                                     <div class="mt-2 small text-muted">
                                         <span class="badge badge-success">Session ouverte</span>
-                                        <span class="ml-1">depuis {{ $sessionActive->created_at->format('H:i') }} ({{ $sessionActive->user->name }})</span>
+                                        <span class="ml-1">depuis {{ $sessionActive->created_at->format('d/m/Y à H:i') }} ({{ $sessionActive->user->name }})</span>
                                     </div>
                                 @else
                                     @can('Ouvrir Session Caisse')
