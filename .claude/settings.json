@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git checkout *)",
-      "Bash(git commit -m 'Afficher la date complète dans la session caisse *)"
+      "Bash(git commit -m 'Afficher la date complète dans la session caisse *)",
+      "Bash(xargs grep -l \"profile\\\\|account\\\\|settings\")",
+      "Bash(grep -r \"Fortify\\\\|Jetstream\\\\|Laravel\\\\\\\\\\\\Auth\" \"g:/Projects/RESTO/app/config\")"
     ]
   }
 }

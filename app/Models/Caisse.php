@@ -45,7 +45,7 @@ class Caisse extends Model
         ?string $note = null,
         ?int $stockMovementId = null,
         ?int $depenseId = null,
-        string $type = 'retrait'
+        string $type
     ): MouvementCaisse {
         $soldeAvant = (float) $this->solde_actuel;
 

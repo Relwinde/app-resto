@@ -60,7 +60,7 @@ class CreateApprovisionnement extends ModalComponent
             [
                 'product_id'      => ['required', 'exists:products,id'],
                 'fournisseur_id'  => ['nullable', 'exists:fournisseurs,id'],
-                'caisse_id'       => ['nullable', 'exists:caisses,id'],
+                'caisse_id'       => ['required', 'exists:caisses,id'],
                 'quantite'        => ['required', 'numeric', 'min:0.01'],
                 'prix_achat'      => ['required', 'numeric', 'min:0'],
                 'date_peremption' => ['nullable', 'date'],
@@ -71,6 +71,7 @@ class CreateApprovisionnement extends ModalComponent
             [
                 'product_id.required' => 'Le produit est obligatoire.',
                 'product_id.exists'   => 'Produit invalide.',
+                'caisse_id.required'  => 'La caisse à débiter est obligatoire.',
                 'quantite.required'   => 'La quantité est obligatoire.',
                 'quantite.min'        => 'La quantité doit être supérieure à 0.',
                 'fichier.required'    => 'Un fichier joint (bon de livraison ou facture) est obligatoire.',
@@ -80,27 +81,22 @@ class CreateApprovisionnement extends ModalComponent
         );
 
         // Vérification du solde caisse avant toute création
-        $caisse  = null;
-        $montant = 0;
+        $caisse  = Caisse::findOrFail($this->caisse_id);
+        $montant = round((float) $this->quantite * (float) $this->prix_achat, 2);
 
-        if ($this->caisse_id) {
-            $caisse  = Caisse::findOrFail($this->caisse_id);
-            $montant = round((float) $this->quantite * (float) $this->prix_achat, 2);
-
-            if ($montant > 0 && $montant > (float) $caisse->solde_actuel) {
-                $this->addError(
-                    'caisse_id',
-                    'Solde insuffisant dans la caisse « ' . $caisse->nom . ' » ('
-                        . number_format($caisse->solde_actuel, 0, ',', ' ') . ' FCFA disponible).'
-                );
-                return;
-            }
+        if ($montant > 0 && $montant > (float) $caisse->solde_actuel) {
+            $this->addError(
+                'caisse_id',
+                'Solde insuffisant dans la caisse « ' . $caisse->nom . ' » ('
+                    . number_format($caisse->solde_actuel, 0, ',', ' ') . ' FCFA disponible).'
+            );
+            return;
         }
 
         $mouvement = StockMovement::create([
             'product_id'      => $this->product_id,
             'fournisseur_id'  => $this->fournisseur_id ?: null,
-            'caisse_id'       => $this->caisse_id ?: null,
+            'caisse_id'       => $this->caisse_id,
             'quantite'        => $this->quantite,
             'prix_achat'      => $this->prix_achat ?: null,
             'date_peremption' => $this->date_peremption ?: null,
@@ -122,8 +118,8 @@ class CreateApprovisionnement extends ModalComponent
             ]);
         }
 
-        if ($caisse && $montant > 0) {
-            $caisse->retirer($montant, $mouvement->note, $mouvement->id);
+        if ($montant > 0) {
+            $caisse->retirer($montant, $mouvement->note, $mouvement->id, null, $type ='approvisionnement');
         }
 
         $this->dispatch('approvisionnement-created');

@@ -118,6 +118,9 @@
                                             @case('depense')
                                                 <span class="badge badge-danger">Dépense</span>
                                                 @break
+                                            @case('approvisionnement')
+                                                <span class="badge badge-info">Approvisionnement</span>
+                                                @break
                                         @endswitch
                                     </td>
                                     <td>
@@ -138,7 +141,7 @@
                                     </td>
                                     <td class="text-right">{{ number_format($mouvement->solde_avant, 0, ',', ' ') }}</td>
                                     <td class="text-right font-w600 {{ in_array($mouvement->type, ['retrait', 'depense']) ? 'text-danger' : 'text-success' }}">
-                                        {{ in_array($mouvement->type, ['retrait', 'depense']) ? '-' : '+' }}{{ number_format($mouvement->montant, 0, ',', ' ') }}
+                                        {{ in_array($mouvement->type, ['retrait', 'depense', 'approvisionnement']) ? '-' : '+' }}{{ number_format($mouvement->montant, 0, ',', ' ') }}
                                     </td>
                                     <td class="text-right font-w600">{{ number_format($mouvement->solde_apres, 0, ',', ' ') }}</td>
                                     <td>{{ $mouvement->user->name }}</td>

@@ -80,10 +80,10 @@
                             <div class="form-group">
                                 <label for="caisse_id">
                                     <i class="fa fa-cash-register mr-1"></i>
-                                    Caisse débitée <span class="text-muted font-w400">(optionnel)</span>
+                                    Caisse débitée <span class="text-danger">*</span>
                                 </label>
                                 <select wire:model.live="caisse_id" class="form-control form-control-alt @error('caisse_id') is-invalid @enderror" id="caisse_id">
-                                    <option value="">-- Aucune déduction caisse --</option>
+                                    <option value="">-- Sélectionner une caisse --</option>
                                     @foreach ($caisses as $caisse)
                                         <option value="{{ $caisse->id }}">
                                             {{ $caisse->nom }}
