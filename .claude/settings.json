@@ -4,7 +4,13 @@
       "Bash(git checkout *)",
       "Bash(git commit -m 'Afficher la date complète dans la session caisse *)",
       "Bash(xargs grep -l \"profile\\\\|account\\\\|settings\")",
-      "Bash(grep -r \"Fortify\\\\|Jetstream\\\\|Laravel\\\\\\\\\\\\Auth\" \"g:/Projects/RESTO/app/config\")"
+      "Bash(grep -r \"Fortify\\\\|Jetstream\\\\|Laravel\\\\\\\\\\\\Auth\" \"g:/Projects/RESTO/app/config\")",
+      "Read(//g/tmp/**)",
+      "Bash(node appro-test-total.js)",
+      "Bash(node appro-test-debug.js)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Admin\\AppData\\Local\\Temp"
     ]
   }
 }

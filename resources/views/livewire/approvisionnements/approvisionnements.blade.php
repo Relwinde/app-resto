@@ -39,13 +39,11 @@
                 <table class="table table-bordered table-striped table-vcenter table-responsive-md">
                     <thead>
                         <tr>
-                            <th>Produit</th>
+                            <th>Numéro</th>
                             <th>Fournisseur</th>
-                            <th class="text-right">Quantité</th>
-                            <th class="text-right">Prix achat</th>
-                            <th class="text-center">Date péremption</th>
-                            <th>N° lot</th>
-                            <th>Note</th>
+                            <th>Caisse</th>
+                            <th class="text-center">Produits</th>
+                            <th class="text-right">Montant total</th>
                             <th class="text-center">Date</th>
                             <th class="text-center" style="width: 100px;">Actions</th>
                         </tr>
@@ -54,20 +52,13 @@
                     <tbody>
                         @forelse ($approvisionnements as $appro)
                             <tr>
-                                <td>{{ $appro->product?->name ?? '—' }}</td>
+                                <td>{{ $appro->numero }}</td>
                                 <td>{{ $appro->fournisseur?->name ?? '—' }}</td>
+                                <td>{{ $appro->caisse?->nom ?? '—' }}</td>
+                                <td class="text-center">{{ $appro->lignes->count() }}</td>
                                 <td class="text-right">
-                                    {{ number_format($appro->quantite, 2, ',', ' ') }}
-                                    <small class="text-muted">{{ $appro->product?->unite }}</small>
+                                    {{ number_format($appro->montant_total, 0, ',', ' ') }} FCFA
                                 </td>
-                                <td class="text-right">
-                                    {{ $appro->prix_achat ? number_format($appro->prix_achat, 0, ',', ' ') : '—' }}
-                                </td>
-                                <td class="text-center">
-                                    {{ $appro->date_peremption ? $appro->date_peremption->format('d/m/Y') : '—' }}
-                                </td>
-                                <td>{{ $appro->numero_lot ?? '—' }}</td>
-                                <td>{{ $appro->note ?? '—' }}</td>
                                 <td class="text-center">{{ $appro->created_at->format('d/m/Y') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group">
@@ -85,7 +76,7 @@
                                         @endcan
                                         @can('Supprimer Approvisionnement')
                                         <a wire:click.prevent="delete({{ $appro->id }})"
-                                            wire:confirm="Supprimer cet approvisionnement ? Le stock du produit sera recalculé."
+                                            wire:confirm="Supprimer cet approvisionnement ? Le stock des produits sera recalculé et la caisse sera recréditée du montant total."
                                             type="button" class="btn btn-sm btn-light" title="Supprimer">
                                             <i class="fa fa-fw fa-trash"></i>
                                         </a>
@@ -95,7 +86,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted">
+                                <td colspan="7" class="text-center text-muted">
                                     Aucun approvisionnement enregistré
                                 </td>
                             </tr>

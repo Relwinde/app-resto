@@ -2,10 +2,10 @@
     <form wire:submit.prevent="save">
         <div class="block block-rounded">
             <div class="block-header block-header-default">
-                <h3 class="block-title">Modifier l'approvisionnement</h3>
+                <h3 class="block-title">Modifier l'approvisionnement {{ $approvisionnement->numero }}</h3>
                 <div class="block-options">
                     @can('Modifier Approvisionnement')
-                    <button type="submit" class="btn btn-sm btn-primary">
+                    <button type="submit" class="btn btn-sm btn-primary" wire:loading.attr="disabled" wire:target="save">
                         Enregistrer
                     </button>
                     @endcan
@@ -24,20 +24,6 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="product_id">Produit <span class="text-danger">*</span></label>
-                                <select wire:model="product_id" class="form-control form-control-alt" id="product_id">
-                                    <option value="">-- Sélectionner un produit --</option>
-                                    @foreach ($produits as $produit)
-                                        <option value="{{ $produit->id }}">{{ $produit->name }} ({{ $produit->unite }})</option>
-                                    @endforeach
-                                </select>
-                                @error('product_id')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label for="fournisseur_id">Fournisseur</label>
                                 <select wire:model="fournisseur_id" class="form-control form-control-alt" id="fournisseur_id">
                                     <option value="">-- Aucun fournisseur --</option>
@@ -50,52 +36,56 @@
                                 @enderror
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="quantite">Quantité reçue <span class="text-danger">*</span></label>
-                                <input wire:model="quantite" type="number" step="0.01" min="0.01"
-                                    class="form-control form-control-alt" id="quantite" placeholder="0.00">
-                                @error('quantite')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="prix_achat">Prix d'achat unitaire</label>
-                                <input wire:model="prix_achat" type="number" step="0.01" min="0"
-                                    class="form-control form-control-alt" id="prix_achat" placeholder="0.00">
-                                @error('prix_achat')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
+                                <label>Caisse débitée</label>
+                                <p class="form-control-plaintext text-muted">
+                                    {{ $approvisionnement->caisse?->nom ?? '—' }}
+                                    <small>(non modifiable — supprimez le bon pour annuler le débit)</small>
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="date_peremption">Date de péremption</label>
-                                <input wire:model="date_peremption" type="date"
-                                    class="form-control form-control-alt" id="date_peremption">
-                                @error('date_peremption')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="numero_lot">Numéro de lot</label>
-                                <input wire:model="numero_lot" type="text"
-                                    class="form-control form-control-alt" id="numero_lot" placeholder="Lot n°...">
-                                @error('numero_lot')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
+                    <div class="table-responsive mb-2">
+                        <table class="table table-bordered table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th style="min-width: 110px;">Quantité <span class="text-danger">*</span></th>
+                                    <th style="min-width: 110px;">Prix total <span class="text-danger">*</span></th>
+                                    <th style="min-width: 150px;">Péremption</th>
+                                    <th style="min-width: 130px;">N° lot</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($lignes as $index => $ligne)
+                                    <tr wire:key="ligne-{{ $ligne['id'] }}">
+                                        <td>{{ $ligne['nom_produit'] }} <small class="text-muted">({{ $ligne['unite'] }})</small></td>
+                                        <td>
+                                            <input wire:model.live="lignes.{{ $index }}.quantite" type="number" step="0.01" min="0.01"
+                                                class="form-control form-control-sm">
+                                            @error("lignes.$index.quantite")
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input wire:model.live="lignes.{{ $index }}.prix_achat" type="number" step="0.01" min="0.01"
+                                                class="form-control form-control-sm">
+                                            @error("lignes.$index.prix_achat")
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input wire:model="lignes.{{ $index }}.date_peremption" type="date" class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input wire:model="lignes.{{ $index }}.numero_lot" type="text" class="form-control form-control-sm">
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
 
                     <div class="row">

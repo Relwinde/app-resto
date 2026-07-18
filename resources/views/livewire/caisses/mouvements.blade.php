@@ -62,6 +62,8 @@
                             <option value="depot">Dépôt</option>
                             <option value="retrait">Retrait</option>
                             <option value="depense">Dépense</option>
+                            <option value="approvisionnement">Approvisionnement</option>
+                            <option value="remboursement">Remboursement</option>
                         </select>
                     </div>
                     <div class="col-sm-2">
@@ -120,6 +122,9 @@
                                                 @break
                                             @case('approvisionnement')
                                                 <span class="badge badge-info">Approvisionnement</span>
+                                                @break
+                                            @case('remboursement')
+                                                <span class="badge badge-success">Remboursement</span>
                                                 @break
                                         @endswitch
                                     </td>

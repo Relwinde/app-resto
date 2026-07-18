@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Approvisionnements;
 
+use App\Models\Approvisionnement;
 use App\Models\Caisse;
-use App\Models\StockMovement;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -28,11 +29,28 @@ class Approvisionnements extends Component
     public function delete(int $id): void
     {
         Gate::authorize('Supprimer Approvisionnement');
-        $appro = StockMovement::find($id);
-        if ($appro) {
-            $appro->delete();
-            $this->dispatch('approvisionnement-deleted');
+
+        $appro = Approvisionnement::find($id);
+        if (! $appro) {
+            return;
         }
+
+        DB::transaction(function () use ($appro) {
+            if ($appro->caisse_id && (float) $appro->montant_total > 0) {
+                $caisse = Caisse::find($appro->caisse_id);
+                if ($caisse) {
+                    $caisse->rembourser(
+                        (float) $appro->montant_total,
+                        "Remboursement suite à suppression de l'approvisionnement {$appro->numero}",
+                        $appro->id
+                    );
+                }
+            }
+
+            $appro->delete(); // cascade sur les lignes stock_movements
+        });
+
+        $this->dispatch('approvisionnement-deleted');
     }
 
     #[On('approvisionnement-created')]
@@ -42,10 +60,10 @@ class Approvisionnements extends Component
     {
         Gate::authorize('Voir Approvisionnements');
 
-        $approvisionnements = StockMovement::with(['product', 'fournisseur'])
+        $approvisionnements = Approvisionnement::with(['fournisseur', 'caisse', 'lignes.product'])
             ->when($this->search, function ($query) {
-                $query->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
-                      ->orWhereHas('fournisseur', fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
+                $query->whereHas('fournisseur', fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+                      ->orWhereHas('lignes.product', fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);

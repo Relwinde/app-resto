@@ -45,7 +45,8 @@ class Caisse extends Model
         ?string $note = null,
         ?int $stockMovementId = null,
         ?int $depenseId = null,
-        string $type
+        string $type = 'retrait',
+        ?int $approvisionnementId = null
     ): MouvementCaisse {
         $soldeAvant = (float) $this->solde_actuel;
 
@@ -58,16 +59,17 @@ class Caisse extends Model
         $soldeApres = $soldeAvant - $montant;
 
         $mouvement = $this->mouvements()->create([
-            'session_caisse_id' => $this->sessionActive()?->id,
-            'stock_movement_id' => $stockMovementId,
-            'depense_id'        => $depenseId,
-            'user_id'           => auth()->id(),
-            'type'              => $type,
-            'montant'           => $montant,
-            'solde_avant'       => $soldeAvant,
-            'solde_apres'       => $soldeApres,
-            'mode_paiement'     => $this->type,
-            'note'              => $note,
+            'session_caisse_id'    => $this->sessionActive()?->id,
+            'stock_movement_id'    => $stockMovementId,
+            'depense_id'           => $depenseId,
+            'approvisionnement_id' => $approvisionnementId,
+            'user_id'              => auth()->id(),
+            'type'                 => $type,
+            'montant'              => $montant,
+            'solde_avant'          => $soldeAvant,
+            'solde_apres'          => $soldeApres,
+            'mode_paiement'        => $this->type,
+            'note'                 => $note,
         ]);
 
         $this->update(['solde_actuel' => $soldeApres]);
@@ -98,6 +100,28 @@ class Caisse extends Model
 
         $this->update(['solde_actuel' => $soldeApres]);
         $commande->update(['statut' => 'payee']);
+
+        return $mouvement;
+    }
+
+    public function rembourser(float $montant, ?string $note = null, ?int $approvisionnementId = null): MouvementCaisse
+    {
+        $soldeAvant = (float) $this->solde_actuel;
+        $soldeApres = $soldeAvant + $montant;
+
+        $mouvement = $this->mouvements()->create([
+            'session_caisse_id'    => $this->sessionActive()?->id,
+            'approvisionnement_id' => $approvisionnementId,
+            'user_id'              => auth()->id(),
+            'type'                 => 'remboursement',
+            'montant'              => $montant,
+            'solde_avant'          => $soldeAvant,
+            'solde_apres'          => $soldeApres,
+            'mode_paiement'        => $this->type,
+            'note'                 => $note,
+        ]);
+
+        $this->update(['solde_actuel' => $soldeApres]);
 
         return $mouvement;
     }

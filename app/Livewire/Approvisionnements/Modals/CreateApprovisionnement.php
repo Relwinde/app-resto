@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Approvisionnements\Modals;
 
+use App\Models\Approvisionnement;
 use App\Models\Caisse;
 use App\Models\Fournisseur;
 use App\Models\Product;
 use App\Models\StockMovement;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\WithFileUploads;
 use LivewireUI\Modal\ModalComponent;
@@ -14,22 +16,22 @@ class CreateApprovisionnement extends ModalComponent
 {
     use WithFileUploads;
 
-    public $product_id      = '';
-    public $fournisseur_id  = '';
-    public $caisse_id       = '';
-    public $quantite        = '';
-    public $prix_achat      = '';
-    public $date_peremption = '';
-    public $numero_lot      = '';
-    public $note            = '';
-    public $fichier         = null;
+    public $fournisseur_id = '';
+    public $caisse_id      = '';
+    public $note           = '';
+    public $fichier        = null;
+
+    public array $lignes = [];
 
     public function mount(): void
     {
         if (! Caisse::sessionOuverte()) {
             $this->dispatch('notify', message: 'Aucune session de caisse ouverte.', type: 'error');
             $this->closeModal();
+            return;
         }
+
+        $this->ajouterLigne();
     }
 
     public function render()
@@ -46,6 +48,31 @@ class CreateApprovisionnement extends ModalComponent
         $this->fichier = null;
     }
 
+    public function ajouterLigne(): void
+    {
+        $this->lignes[] = [
+            'product_id'      => '',
+            'quantite'        => '',
+            'prix_achat'      => '',
+            'date_peremption' => '',
+            'numero_lot'      => '',
+        ];
+    }
+
+    public function retirerLigne(int $index): void
+    {
+        unset($this->lignes[$index]);
+        $this->lignes = array_values($this->lignes);
+    }
+
+    public function getMontantTotalProperty(): float
+    {
+        return round(
+            collect($this->lignes)->sum(fn ($ligne) => (float) ($ligne['prix_achat'] ?: 0)),
+            2
+        );
+    }
+
     public function create(): void
     {
         Gate::authorize('Créer Approvisionnement');
@@ -58,33 +85,38 @@ class CreateApprovisionnement extends ModalComponent
 
         $this->validate(
             [
-                'product_id'      => ['required', 'exists:products,id'],
-                'fournisseur_id'  => ['nullable', 'exists:fournisseurs,id'],
-                'caisse_id'       => ['required', 'exists:caisses,id'],
-                'quantite'        => ['required', 'numeric', 'min:0.01'],
-                'prix_achat'      => ['required', 'numeric', 'min:0'],
-                'date_peremption' => ['nullable', 'date'],
-                'numero_lot'      => ['nullable', 'string', 'max:100'],
-                'note'            => ['nullable', 'string', 'max:500'],
-                'fichier'         => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+                'fournisseur_id'               => ['nullable', 'exists:fournisseurs,id'],
+                'caisse_id'                    => ['required', 'exists:caisses,id'],
+                'note'                         => ['nullable', 'string', 'max:500'],
+                'fichier'                      => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+                'lignes'                       => ['required', 'array', 'min:1'],
+                'lignes.*.product_id'          => ['required', 'exists:products,id'],
+                'lignes.*.quantite'            => ['required', 'numeric', 'min:0.01'],
+                'lignes.*.prix_achat'          => ['required', 'numeric', 'min:0.01'],
+                'lignes.*.date_peremption'     => ['nullable', 'date'],
+                'lignes.*.numero_lot'          => ['nullable', 'string', 'max:100'],
             ],
             [
-                'product_id.required' => 'Le produit est obligatoire.',
-                'product_id.exists'   => 'Produit invalide.',
-                'caisse_id.required'  => 'La caisse à débiter est obligatoire.',
-                'quantite.required'   => 'La quantité est obligatoire.',
-                'quantite.min'        => 'La quantité doit être supérieure à 0.',
-                'fichier.required'    => 'Un fichier joint (bon de livraison ou facture) est obligatoire.',
-                'fichier.mimes'       => 'Le fichier doit être un PDF ou une image (jpg, jpeg, png).',
-                'fichier.max'         => 'Le fichier ne doit pas dépasser 10 Mo.',
+                'caisse_id.required'            => 'La caisse à débiter est obligatoire.',
+                'fichier.required'               => 'Un fichier joint (bon de livraison ou facture) est obligatoire.',
+                'fichier.mimes'                  => 'Le fichier doit être un PDF ou une image (jpg, jpeg, png).',
+                'fichier.max'                    => 'Le fichier ne doit pas dépasser 10 Mo.',
+                'lignes.required'                => 'Ajoutez au moins un produit.',
+                'lignes.min'                     => 'Ajoutez au moins un produit.',
+                'lignes.*.product_id.required'   => 'Le produit est obligatoire.',
+                'lignes.*.product_id.exists'     => 'Produit invalide.',
+                'lignes.*.quantite.required'     => 'La quantité est obligatoire.',
+                'lignes.*.quantite.min'          => 'La quantité doit être supérieure à 0.',
+                'lignes.*.prix_achat.required'   => 'Le prix total est obligatoire.',
+                'lignes.*.prix_achat.min'        => 'Le prix total doit être supérieur à 0.',
             ]
         );
 
-        // Vérification du solde caisse avant toute création
-        $caisse  = Caisse::findOrFail($this->caisse_id);
-        $montant = round((float) $this->quantite * (float) $this->prix_achat, 2);
+        // Vérification du solde caisse avant toute écriture
+        $caisse       = Caisse::findOrFail($this->caisse_id);
+        $montantTotal = $this->montantTotal;
 
-        if ($montant > 0 && $montant > (float) $caisse->solde_actuel) {
+        if ($montantTotal > 0 && $montantTotal > (float) $caisse->solde_actuel) {
             $this->addError(
                 'caisse_id',
                 'Solde insuffisant dans la caisse « ' . $caisse->nom . ' » ('
@@ -93,34 +125,49 @@ class CreateApprovisionnement extends ModalComponent
             return;
         }
 
-        $mouvement = StockMovement::create([
-            'product_id'      => $this->product_id,
-            'fournisseur_id'  => $this->fournisseur_id ?: null,
-            'caisse_id'       => $this->caisse_id,
-            'quantite'        => $this->quantite,
-            'prix_achat'      => $this->prix_achat ?: null,
-            'date_peremption' => $this->date_peremption ?: null,
-            'numero_lot'      => $this->numero_lot ?: null,
-            'note'            => $this->note ?: null,
-        ]);
-
-        if ($this->fichier) {
-            $path = $this->fichier->storeAs(
-                "files/approvisionnements/{$mouvement->id}",
-                $this->fichier->getClientOriginalName(),
-                'local'
-            );
-            $mouvement->files()->create([
-                'original_name' => $this->fichier->getClientOriginalName(),
-                'path'          => $path,
-                'mime_type'     => $this->fichier->getMimeType(),
-                'size'          => $this->fichier->getSize(),
+        DB::transaction(function () use ($caisse, $montantTotal) {
+            $approvisionnement = Approvisionnement::create([
+                'numero'            => Approvisionnement::genererNumero(),
+                'fournisseur_id'    => $this->fournisseur_id ?: null,
+                'caisse_id'         => $this->caisse_id,
+                'session_caisse_id' => $caisse->sessionActive()?->id,
+                'user_id'           => auth()->id(),
+                'montant_total'     => $montantTotal,
+                'note'              => $this->note ?: null,
             ]);
-        }
 
-        if ($montant > 0) {
-            $caisse->retirer($montant, $mouvement->note, $mouvement->id, null, $type ='approvisionnement');
-        }
+            foreach ($this->lignes as $ligne) {
+                StockMovement::create([
+                    'approvisionnement_id' => $approvisionnement->id,
+                    'product_id'           => $ligne['product_id'],
+                    'fournisseur_id'       => $this->fournisseur_id ?: null,
+                    'caisse_id'            => $this->caisse_id,
+                    'quantite'             => $ligne['quantite'],
+                    'prix_achat'           => $ligne['prix_achat'] ?: null,
+                    'date_peremption'      => $ligne['date_peremption'] ?: null,
+                    'numero_lot'           => $ligne['numero_lot'] ?: null,
+                    'note'                 => $this->note ?: null,
+                ]);
+            }
+
+            if ($this->fichier) {
+                $path = $this->fichier->storeAs(
+                    "files/approvisionnements/{$approvisionnement->id}",
+                    $this->fichier->getClientOriginalName(),
+                    'local'
+                );
+                $approvisionnement->files()->create([
+                    'original_name' => $this->fichier->getClientOriginalName(),
+                    'path'          => $path,
+                    'mime_type'     => $this->fichier->getMimeType(),
+                    'size'          => $this->fichier->getSize(),
+                ]);
+            }
+
+            if ($montantTotal > 0) {
+                $caisse->retirer($montantTotal, $approvisionnement->note, null, null, 'approvisionnement', $approvisionnement->id);
+            }
+        });
 
         $this->dispatch('approvisionnement-created');
         $this->reset();

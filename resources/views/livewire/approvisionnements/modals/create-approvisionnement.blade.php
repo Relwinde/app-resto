@@ -5,7 +5,7 @@
                 <h3 class="block-title">Nouvel Approvisionnement</h3>
                 <div class="block-options">
                     @can('Créer Approvisionnement')
-                    <button type="submit" class="btn btn-sm btn-primary">
+                    <button type="submit" class="btn btn-sm btn-primary" wire:loading.attr="disabled" wire:target="create">
                         Enregistrer
                     </button>
                     @endcan
@@ -24,20 +24,6 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="product_id">Produit <span class="text-danger">*</span></label>
-                                <select wire:model="product_id" class="form-control form-control-alt" id="product_id">
-                                    <option value="">-- Sélectionner un produit --</option>
-                                    @foreach ($produits as $produit)
-                                        <option value="{{ $produit->id }}">{{ $produit->name }} ({{ $produit->unite }})</option>
-                                    @endforeach
-                                </select>
-                                @error('product_id')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label for="fournisseur_id">Fournisseur</label>
                                 <select wire:model="fournisseur_id" class="form-control form-control-alt" id="fournisseur_id">
                                     <option value="">-- Aucun fournisseur --</option>
@@ -50,32 +36,6 @@
                                 @enderror
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="quantite">Quantité reçue <span class="text-danger">*</span></label>
-                                <input wire:model.live="quantite" type="number" step="0.01" min="0.01"
-                                    class="form-control form-control-alt" id="quantite" placeholder="0.00">
-                                @error('quantite')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="prix_achat">Prix d'achat unitaire</label>
-                                <input wire:model.live="prix_achat" type="number" step="0.01" min="0"
-                                    class="form-control form-control-alt" id="prix_achat" placeholder="0.00">
-                                @error('prix_achat')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="caisse_id">
@@ -96,37 +56,84 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            @if ($caisse_id && $quantite && $prix_achat && (float)$quantite > 0 && (float)$prix_achat > 0)
-                                <div class="alert alert-warning w-100 py-2 mb-3">
-                                    <i class="fa fa-exclamation-triangle mr-1"></i>
-                                    Montant à déduire :
-                                    <strong>{{ number_format((float)$quantite * (float)$prix_achat, 0, ',', ' ') }} FCFA</strong>
-                                </div>
-                            @endif
-                        </div>
                     </div>
 
-                    <div class="row">
+                    @error('lignes')
+                        <div class="text-danger small mb-2">{{ $message }}</div>
+                    @enderror
+
+                    <div class="table-responsive mb-2">
+                        <table class="table table-bordered table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 180px;">Produit <span class="text-danger">*</span></th>
+                                    <th style="min-width: 110px;">Quantité <span class="text-danger">*</span></th>
+                                    <th style="min-width: 110px;">Prix total <span class="text-danger">*</span></th>
+                                    <th style="min-width: 150px;">Péremption</th>
+                                    <th style="min-width: 130px;">N° lot</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($lignes as $index => $ligne)
+                                    <tr wire:key="ligne-{{ $index }}">
+                                        <td>
+                                            <select wire:model="lignes.{{ $index }}.product_id" class="form-control form-control-sm">
+                                                <option value="">-- Produit --</option>
+                                                @foreach ($produits as $produit)
+                                                    <option value="{{ $produit->id }}">{{ $produit->name }} ({{ $produit->unite }})</option>
+                                                @endforeach
+                                            </select>
+                                            @error("lignes.$index.product_id")
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input wire:model.live="lignes.{{ $index }}.quantite" type="number" step="0.01" min="0.01"
+                                                class="form-control form-control-sm" placeholder="0.00">
+                                            @error("lignes.$index.quantite")
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input wire:model.live="lignes.{{ $index }}.prix_achat" type="number" step="0.01" min="0.01"
+                                                class="form-control form-control-sm" placeholder="0.00">
+                                            @error("lignes.$index.prix_achat")
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input wire:model="lignes.{{ $index }}.date_peremption" type="date" class="form-control form-control-sm">
+                                        </td>
+                                        <td>
+                                            <input wire:model="lignes.{{ $index }}.numero_lot" type="text" class="form-control form-control-sm" placeholder="Lot n°...">
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" wire:click="retirerLigne({{ $index }})"
+                                                class="btn btn-sm btn-danger" @if(count($lignes) <= 1) disabled @endif>
+                                                <i class="fa fa-fw fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="date_peremption">Date de péremption</label>
-                                <input wire:model="date_peremption" type="date"
-                                    class="form-control form-control-alt" id="date_peremption">
-                                @error('date_peremption')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            <button type="button" wire:click="ajouterLigne" class="btn btn-sm btn-alt-primary">
+                                <i class="fa fa-plus mr-1"></i> Ajouter un produit
+                            </button>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="numero_lot">Numéro de lot</label>
-                                <input wire:model="numero_lot" type="text"
-                                    class="form-control form-control-alt" id="numero_lot" placeholder="Lot n°...">
-                                @error('numero_lot')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if ($this->montantTotal > 0)
+                                <div class="alert alert-warning w-100 py-2 mb-0">
+                                    <i class="fa fa-exclamation-triangle mr-1"></i>
+                                    Montant total à déduire :
+                                    <strong>{{ number_format($this->montantTotal, 0, ',', ' ') }} FCFA</strong>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
