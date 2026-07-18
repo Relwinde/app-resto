@@ -56,6 +56,7 @@
     <!-- END Page Container -->
 
     @include('partials.scripts')
+    <script src="{{ asset('assets/js/plugins/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
     @livewireScripts
     @livewire('wire-elements-modal')
     @stack('js')

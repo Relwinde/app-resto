@@ -36,6 +36,7 @@
                             <th>Catégorie</th>
                             <th>Prix vente</th>
                             <th>Prix achat</th>
+                            <th>Stock</th>
                             <th>Unité</th>
                             <th class="text-center">Approvisionnable</th>
                             <th class="text-center" style="width: 100px;">Actions</th>
@@ -49,6 +50,9 @@
                                 <td>{{ $produit->category?->name ?? '-' }}</td>
                                 <td>{{ number_format($produit->prix_vente, 0, ',', ' ') }}</td>
                                 <td>{{ $produit->prix_achat ? number_format($produit->prix_achat, 0, ',', ' ') : '-' }}</td>
+                                <td class="{{ $produit->stock_actuel <= 0 ? 'text-danger font-w600' : '' }}">
+                                    {{ number_format($produit->stock_actuel, 2, ',', ' ') }}
+                                </td>
                                 <td>{{ $produit->unite }}</td>
                                 <td class="text-center">
                                     @if ($produit->is_suppliable)
@@ -80,7 +84,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">
+                                <td colspan="8" class="text-center text-muted">
                                     Aucun produit enregistré
                                 </td>
                             </tr>

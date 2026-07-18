@@ -72,6 +72,13 @@ class Caisses extends Component
             return;
         }
 
+        $quantiteCible = ($this->panier[$id]['quantite'] ?? 0) + 1;
+
+        if ($produit->is_suppliable && $quantiteCible > $produit->stock_actuel) {
+            $this->dispatch('notify', message: "Stock insuffisant pour {$produit->name}.", type: 'error');
+            return;
+        }
+
         if (isset($this->panier[$id])) {
             $this->panier[$id]['quantite']++;
             $this->panier[$id]['sous_total'] = $this->panier[$id]['quantite'] * $this->panier[$id]['prix_unitaire'];
@@ -88,10 +95,19 @@ class Caisses extends Component
 
     public function incrementer(int $id): void
     {
-        if (isset($this->panier[$id])) {
-            $this->panier[$id]['quantite']++;
-            $this->panier[$id]['sous_total'] = $this->panier[$id]['quantite'] * $this->panier[$id]['prix_unitaire'];
+        if (! isset($this->panier[$id])) {
+            return;
         }
+
+        $produit = Product::find($id);
+
+        if ($produit && $produit->is_suppliable && ($this->panier[$id]['quantite'] + 1) > $produit->stock_actuel) {
+            $this->dispatch('notify', message: "Stock insuffisant pour {$produit->name}.", type: 'error');
+            return;
+        }
+
+        $this->panier[$id]['quantite']++;
+        $this->panier[$id]['sous_total'] = $this->panier[$id]['quantite'] * $this->panier[$id]['prix_unitaire'];
     }
 
     public function decrementer(int $id): void

@@ -331,17 +331,28 @@
 
                         <div class="row row-deck">
                             @forelse ($produits as $produit)
+                                @php $epuise = $produit->is_suppliable && $produit->stock_actuel <= 0; @endphp
                                 <div class="col-6 col-sm-4 col-md-3 mb-3">
                                     <button type="button"
                                         wire:click="ajouterProduit({{ $produit->id }})"
                                         class="btn btn-block btn-alt-secondary text-left p-2 h-100"
-                                        style="border: 1px solid #e4e7ed;">
+                                        style="border: 1px solid #e4e7ed;{{ $epuise ? ' opacity: 0.5;' : '' }}"
+                                        @disabled($epuise)>
                                         <div class="font-w600 font-size-sm text-dark mb-1"
                                             style="line-height:1.3;">{{ $produit->name }}</div>
                                         <div class="text-success font-size-sm font-w600">
                                             {{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA
                                         </div>
                                         <div class="text-muted font-size-xs">{{ $produit->category?->name }}</div>
+                                        @if ($produit->is_suppliable)
+                                            @if ($epuise)
+                                                <div class="text-danger font-size-xs font-w600">Épuisé</div>
+                                            @else
+                                                <div class="text-muted font-size-xs">
+                                                    Stock : {{ number_format($produit->stock_actuel, 0, ',', ' ') }} {{ $produit->unite }}
+                                                </div>
+                                            @endif
+                                        @endif
                                     </button>
                                 </div>
                             @empty
