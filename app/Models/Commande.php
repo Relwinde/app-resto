@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Commande extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'numero', 'caisse_id', 'session_caisse_id', 'user_id',
         'table_numero', 'client_nom', 'statut', 'note', 'montant_total',
@@ -17,6 +20,13 @@ class Commande extends Model
     protected $casts = [
         'montant_total' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Commande $commande) {
+            $commande->items()->delete();
+        });
+    }
 
     public function items(): HasMany
     {

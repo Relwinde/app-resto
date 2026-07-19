@@ -7,10 +7,13 @@
       "Bash(grep -r \"Fortify\\\\|Jetstream\\\\|Laravel\\\\\\\\\\\\Auth\" \"g:/Projects/RESTO/app/config\")",
       "Read(//g/tmp/**)",
       "Bash(node appro-test-total.js)",
-      "Bash(node appro-test-debug.js)"
+      "Bash(node appro-test-debug.js)",
+      "Bash(mkdir -p \"g:/Projects/RESTO/app/app/Console/Commands\")",
+      "Bash(php -l app/Console/Commands/ResetProductsStock.php)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\Admin\\AppData\\Local\\Temp"
+      "C:\\Users\\Admin\\AppData\\Local\\Temp",
+      "g:\\Projects\\RESTO\\app\\app\\Console"
     ]
   }
 }

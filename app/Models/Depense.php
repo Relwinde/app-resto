@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Depense extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'caisse_id', 'session_caisse_id', 'user_id', 'valide_par', 'paye_par',
         'montant', 'motif', 'beneficiaire', 'note', 'statut', 'valide_le', 'paye_le',

@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Approvisionnement extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'numero', 'fournisseur_id', 'caisse_id', 'session_caisse_id', 'user_id',
         'montant_total', 'note',
@@ -18,6 +21,13 @@ class Approvisionnement extends Model
     protected $casts = [
         'montant_total' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Approvisionnement $approvisionnement) {
+            $approvisionnement->lignes()->delete();
+        });
+    }
 
     public function lignes(): HasMany
     {
