@@ -9,6 +9,7 @@ use App\Livewire\Login;
 use App\Livewire\Produits\Produits;
 use App\Livewire\Categories\Categories;
 use App\Livewire\Approvisionnements\Approvisionnements;
+use App\Livewire\Pertes\Pertes;
 use App\Livewire\Fournisseurs\Fournisseurs;
 use App\Livewire\Caisses\Caisses;
 use App\Livewire\Caisses\Sessions;
@@ -23,6 +24,7 @@ Route::get('/dashboard', Dashboard::class)->name('dashboard')->middleware('auth'
 Route::get('/produits', Produits::class)->name('produits')->middleware('auth');
 Route::get('/categories', Categories::class)->name('categories')->middleware('auth');
 Route::get('/approvisionnements', Approvisionnements::class)->name('approvisionnements')->middleware('auth');
+Route::get('/pertes', Pertes::class)->name('pertes')->middleware('auth');
 Route::get('/fournisseurs', Fournisseurs::class)->name('fournisseurs')->middleware('auth');
 Route::get('/caisse', Caisses::class)->name('caisse')->middleware('auth');
 Route::get('/caisse/sessions', Sessions::class)->name('caisse.sessions')->middleware('auth');

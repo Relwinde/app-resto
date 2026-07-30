@@ -11,7 +11,7 @@
                 </a>
             </li>
 
-            @canany(['Voir Produits', 'Voir Catégories', 'Voir Fournisseurs', 'Voir Approvisionnements'])
+            @canany(['Voir Produits', 'Voir Catégories', 'Voir Fournisseurs', 'Voir Approvisionnements', 'Voir Pertes'])
             <li class="nav-main-heading">Stock</li>
 
             @can('Voir Produits')
@@ -40,6 +40,16 @@
                 <a class="nav-main-link {{ request()->routeIs('approvisionnements') ? 'active' : '' }}" href="{{ route('approvisionnements') }}" wire:navigate>
                     <i class="nav-main-link-icon fa fa-truck"></i>
                     <span class="nav-main-link-name">Approvisionnements</span>
+                </a>
+            </li>
+            @endcan
+
+            @can('Voir Pertes')
+            <!-- PERTES -->
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ request()->routeIs('pertes') ? 'active' : '' }}" href="{{ route('pertes') }}" wire:navigate>
+                    <i class="nav-main-link-icon fa fa-exclamation-triangle"></i>
+                    <span class="nav-main-link-name">Pertes</span>
                 </a>
             </li>
             @endcan

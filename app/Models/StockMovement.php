@@ -14,6 +14,7 @@ class StockMovement extends Model
     protected $fillable = [
         'product_id',
         'approvisionnement_id',
+        'perte_id',
         'fournisseur_id',
         'caisse_id',
         'quantite',
@@ -37,6 +38,11 @@ class StockMovement extends Model
     public function approvisionnement(): BelongsTo
     {
         return $this->belongsTo(Approvisionnement::class);
+    }
+
+    public function perte(): BelongsTo
+    {
+        return $this->belongsTo(Perte::class);
     }
 
     public function fournisseur(): BelongsTo

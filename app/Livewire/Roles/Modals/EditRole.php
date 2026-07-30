@@ -20,6 +20,7 @@ class EditRole extends ModalComponent
             'Catégories'         => ['Voir Catégories', 'Créer Catégorie', 'Modifier Catégorie', 'Supprimer Catégorie'],
             'Fournisseurs'       => ['Voir Fournisseurs', 'Créer Fournisseur', 'Modifier Fournisseur', 'Supprimer Fournisseur'],
             'Approvisionnements' => ['Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement'],
+            'Pertes'             => ['Voir Pertes', 'Créer Perte', 'Modifier Perte', 'Supprimer Perte'],
             'Caisse'             => ['Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse', 'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse', 'Voir Activité Caisse', 'Changer Statut Commande', 'Enregistrer Dépôt'],
             'Commandes'          => ['Voir Commandes', 'Voir Détail Commande', 'Annuler Commande'],
             'Journal'            => ['Voir Journal Caisse'],

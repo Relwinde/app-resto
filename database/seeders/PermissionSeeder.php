@@ -22,6 +22,8 @@ class PermissionSeeder extends Seeder
             'Voir Fournisseurs', 'Créer Fournisseur', 'Modifier Fournisseur', 'Supprimer Fournisseur',
             // Approvisionnements
             'Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement',
+            // Pertes
+            'Voir Pertes', 'Créer Perte', 'Modifier Perte', 'Supprimer Perte',
             // Caisse
             'Voir Caisse', 'Ouvrir Session Caisse', 'Fermer Session Caisse',
             'Enregistrer Commande', 'Encaisser Commande', 'Voir Sessions Caisse',
@@ -66,6 +68,7 @@ class PermissionSeeder extends Seeder
             'Voir Catégories', 'Créer Catégorie', 'Modifier Catégorie', 'Supprimer Catégorie',
             'Voir Fournisseurs', 'Créer Fournisseur', 'Modifier Fournisseur', 'Supprimer Fournisseur',
             'Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement',
+            'Voir Pertes', 'Créer Perte', 'Modifier Perte', 'Supprimer Perte',
             'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense',
         ]);
     }
