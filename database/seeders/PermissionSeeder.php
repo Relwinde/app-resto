@@ -49,7 +49,7 @@ class PermissionSeeder extends Seeder
         $gerant->syncPermissions($permissions);
 
         // caissier
-        $caissier = Role::firstOrCreate(['name' => 'caissier', 'guard_name' => 'web']);
+        /* $caissier = Role::firstOrCreate(['name' => 'caissier', 'guard_name' => 'web']);
         $caissier->syncPermissions([
             'Voir Produits',
             'Voir Catégories',
@@ -59,10 +59,10 @@ class PermissionSeeder extends Seeder
             'Voir Commandes', 'Voir Détail Commande', 'Annuler Commande',
             'Voir Journal Caisse',
             'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense', 'Payer Dépense',
-        ]);
+        ]); */
 
         // magasinier
-        $magasinier = Role::firstOrCreate(['name' => 'magasinier', 'guard_name' => 'web']);
+        /* $magasinier = Role::firstOrCreate(['name' => 'magasinier', 'guard_name' => 'web']);
         $magasinier->syncPermissions([
             'Voir Produits', 'Créer Produit', 'Modifier Produit', 'Supprimer Produit',
             'Voir Catégories', 'Créer Catégorie', 'Modifier Catégorie', 'Supprimer Catégorie',
@@ -70,6 +70,6 @@ class PermissionSeeder extends Seeder
             'Voir Approvisionnements', 'Créer Approvisionnement', 'Modifier Approvisionnement', 'Supprimer Approvisionnement',
             'Voir Pertes', 'Créer Perte', 'Modifier Perte', 'Supprimer Perte',
             'Voir Dépenses', 'Créer Dépense', 'Modifier Dépense', 'Soumettre Dépense',
-        ]);
+        ]); */
     }
 }
